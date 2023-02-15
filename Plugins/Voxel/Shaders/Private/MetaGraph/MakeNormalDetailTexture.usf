@@ -1,0 +1,43 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+int TextureSize;
+int NumCells;
+int NumCellsPerSide;
+
+uint3 ConstantNormals;
+
+Buffer<float> NormalsX;
+Buffer<float> NormalsY;
+Buffer<float> NormalsZ;
+
+RWTexture2D<uint> Texture;
+
+[numthreads(4, 4, 4)]
+void Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	const int TextureX = DispatchThreadId.x;
+	const int TextureY = DispatchThreadId.y;
+	const int CellIndex = DispatchThreadId.z;
+
+	if (TextureX >= TextureSize ||
+		TextureY >= TextureSize ||
+		CellIndex >= NumCells)
+	{
+		return;
+	}
+	const int CellX = TextureSize * (CellIndex % NumCellsPerSide);
+	const int CellY = TextureSize * (CellIndex / NumCellsPerSide);
+	const int DataIndex = TextureX + TextureY * TextureSize + CellIndex * TextureSize * TextureSize;
+
+	const float3 Normal = float3(
+		NormalsX[ConstantNormals.x ? 0 : DataIndex],
+		NormalsY[ConstantNormals.y ? 0 : DataIndex],
+		NormalsZ[ConstantNormals.z ? 0 : DataIndex]);
+
+	const float2 Octahedron = UnitVectorToOctahedron(normalize(Normal)) * 0.5f + 0.5f;
+
+	const int2 TexCoord = int2(CellX + TextureX, CellY + TextureY);
+	Texture[TexCoord] = FloatToByte(Octahedron.x) | (FloatToByte(Octahedron.y) << 8);
+}

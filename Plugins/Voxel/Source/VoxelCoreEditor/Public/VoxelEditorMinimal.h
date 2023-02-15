@@ -1,0 +1,47 @@
+// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "VoxelMinimal.h"
+#include "VoxelEditorStyle.h"
+#include "VoxelTransaction.h"
+#include "SVoxelDetailWidgets.h"
+#include "SVoxelDetailComboBox.h"
+#include "VoxelThumbnailRenderers.h"
+#include "VoxelDetailsRefreshOnUndo.h"
+#include "VoxelEditorDetailsUtilities.h"
+#include "VoxelPlaceableItemUtilities.h"
+
+#include "ScopedTransaction.h"
+#include "EditorViewportClient.h"
+#include "EditorReimportHandler.h"
+#include "Slate/DeferredCleanupSlateBrush.h"
+#include "ThumbnailRendering/ThumbnailManager.h"
+#include "Framework/Commands/Commands.h"
+#include "Framework/MultiBox/MultiBoxBuilder.h"
+
+#include "DetailWidgetRow.h"
+#include "DetailCategoryBuilder.h"
+#include "IDetailGroup.h"
+#include "IDetailCustomization.h"
+#include "IDetailChildrenBuilder.h"
+#include "IPropertyUtilities.h"
+#include "PropertyCustomizationHelpers.h"
+
+#include "Widgets/Input/SSlider.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/SSearchBox.h"
+#include "Widgets/Docking/SDockTab.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Images/SThrobber.h"
+#include "Widgets/Layout/SSpacer.h"
+#include "Widgets/Layout/SWrapBox.h"
+#include "Widgets/Layout/SScaleBox.h"
+#include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Layout/SSeparator.h"
+#include "Widgets/Layout/SUniformGridPanel.h"
+#include "Widgets/Text/SInlineEditableTextBlock.h"
+
+#include "Factories/Factory.h"
+#include "ActorFactories/ActorFactory.h"

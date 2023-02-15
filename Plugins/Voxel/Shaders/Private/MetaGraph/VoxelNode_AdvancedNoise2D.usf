@@ -1,0 +1,116 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint Num;
+int Seed;
+
+DECLARE_SCALAR_ARRAY(uint, OctaveTypes, 32);
+DECLARE_SCALAR_ARRAY(float, OctaveStrengths, 32);
+
+uint PositionsXConstant;
+Buffer<float> PositionsXBuffer;
+
+uint PositionsYConstant;
+Buffer<float> PositionsYBuffer;
+
+uint AmplitudeConstant;
+Buffer<float> AmplitudeBuffer;
+
+uint FeatureScaleConstant;
+Buffer<float> FeatureScaleBuffer;
+
+uint LacunarityConstant;
+Buffer<float> LacunarityBuffer;
+
+uint GainConstant;
+Buffer<float> GainBuffer;
+
+uint CellularJitterConstant;
+Buffer<float> CellularJitterBuffer;
+
+RWBuffer<float> Result;
+
+#define OctaveType_SmoothPerlin 0
+#define OctaveType_BillowyPerlin 1
+#define OctaveType_RidgedPerlin 2
+
+#define OctaveType_SmoothCellular 3
+#define OctaveType_BillowyCellular 4
+#define OctaveType_RidgedCellular 5
+
+[numthreads(64, 1, 1)]
+void Main(uint DispatchThreadId : SV_DispatchThreadID)
+{
+	const uint Index = DispatchThreadId;
+	if (Index >= Num)
+	{
+		return;
+	}
+	
+	const float Lacunarity = LacunarityBuffer[LacunarityConstant ? 0 : Index];
+	const float Gain = GainBuffer[GainConstant ? 0 : Index];
+	const float CellularJitter = CellularJitterBuffer[CellularJitterConstant ? 0 : Index];
+
+	float Sum = 0.f;
+	float AmplitudeSum = 0.f;
+
+	float Amplitude = 1.f;
+
+	float2 Position;
+	Position.x = PositionsXBuffer[PositionsXConstant ? 0 : Index];
+	Position.y = PositionsYBuffer[PositionsYConstant ? 0 : Index];
+
+	Position /= FeatureScaleBuffer[FeatureScaleConstant ? 0 : Index];
+
+	int MutableSeed = Seed;
+
+	for (int OctaveIndex = 0; OctaveIndex < NUM_OCTAVES; OctaveIndex++)
+	{
+		float Noise;
+		const uint OctaveType = GET_SCALAR_ARRAY_ELEMENT(OctaveTypes, OctaveIndex);
+
+		BRANCH
+		if (OctaveType <= OctaveType_RidgedPerlin)
+		{
+			Noise = GetPerlin2D(MutableSeed, Position);
+			
+			FLATTEN
+			if (OctaveType == OctaveType_BillowyPerlin)
+			{
+				Noise = abs(Noise) * 2 - 1;
+			}
+			FLATTEN
+			if (OctaveType == OctaveType_RidgedPerlin)
+			{
+				Noise = (1 - abs(Noise)) * 2 - 1;
+			}
+		}
+		else
+		{
+			Noise = GetCellularNoise2D(MutableSeed, Position, CellularJitter);
+
+			FLATTEN
+			if (OctaveType == OctaveType_BillowyCellular)
+			{
+				Noise = abs(Noise) * 2 - 1;
+			}
+			FLATTEN
+			if (OctaveType == OctaveType_RidgedCellular)
+			{
+				Noise = (1 - abs(Noise)) * 2 - 1;
+			}
+		}
+
+		const float Strength = GET_SCALAR_ARRAY_ELEMENT(OctaveStrengths, OctaveIndex);
+
+		Sum = Sum + Noise * Strength * Amplitude;
+		AmplitudeSum = AmplitudeSum + abs(Strength * Amplitude);
+		Amplitude = Amplitude * Gain;
+		Position = Position * Lacunarity;
+		MutableSeed = (MutableSeed * 196314165) + 907633515;
+	}
+
+	const float BaseAmplitude = AmplitudeBuffer[AmplitudeConstant ? 0 : Index];
+	Result[Index] = Sum / (AmplitudeSum == 0.f ? 1.f : AmplitudeSum) * BaseAmplitude;
+}

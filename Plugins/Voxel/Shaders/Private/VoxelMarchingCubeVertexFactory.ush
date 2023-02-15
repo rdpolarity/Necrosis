@@ -1,0 +1,221 @@
+// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+#include "/Engine/Private/VertexFactoryCommon.ush"
+
+// NOTES
+// Primitive is FPrimitiveUniformShaderParameters, set in FMeshMaterialShader::GetElementShaderBindings
+
+uint ChunkSize;
+uint NumCellsPerSide;
+uint TextureSize;
+uint AtlasTextureSize;
+SamplerState TextureSampler;
+Texture2D IndirectionTexture;
+Texture2D ColorTexture;
+Texture2D NormalTexture;
+
+struct FVertexFactoryInput
+{
+	float PositionX : ATTRIBUTE0;
+	float PositionY : ATTRIBUTE1;
+	float PositionZ : ATTRIBUTE2;
+};
+
+// Position only / Position & Normal are used for optimized depth/shadow passes
+#define FPositionOnlyVertexFactoryInput FVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput
+
+struct FVertexFactoryInterpolantsVSToPS
+{
+	float3 LocalPosition : TEXCOORD0;
+};
+
+struct FVertexFactoryIntermediates
+{
+	float3 Position;
+	FSceneDataIntermediates SceneData;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+FVertexFactoryIntermediates GetVertexFactoryIntermediates(FVertexFactoryInput Input)
+{
+	FVertexFactoryIntermediates Intermediates = (FVertexFactoryIntermediates)0;
+	Intermediates.SceneData = VF_GPUSCENE_GET_INTERMEDIATES(Input);
+	Intermediates.Position = float3(Input.PositionX, Input.PositionY, Input.PositionZ);
+	return Intermediates;
+}
+
+FMaterialVertexParameters GetMaterialVertexParameters(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float3 WorldPosition, half3x3 TangentToLocal)
+{
+	FMaterialVertexParameters Result = (FMaterialVertexParameters)0;
+	Result.SceneData = Intermediates.SceneData;
+	Result.WorldPosition = WorldPosition;
+	Result.TangentToWorld = GetLocalToWorld3x3();
+	Result.PreSkinnedPosition = WorldPosition;
+	Result.PreSkinnedNormal = TangentToLocal[2];
+	return Result;
+}
+
+FVertexFactoryInterpolantsVSToPS VertexFactoryGetInterpolantsVSToPS(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, FMaterialVertexParameters VertexParameters)
+{
+	FVertexFactoryInterpolantsVSToPS Interpolants = (FVertexFactoryInterpolantsVSToPS)0;
+	Interpolants.LocalPosition = float3(Input.PositionX, Input.PositionY, Input.PositionZ);
+	return Interpolants;
+}
+
+FMaterialPixelParameters GetMaterialPixelParameters(FVertexFactoryInterpolantsVSToPS Interpolants, float4 SvPosition)
+{
+	const float3 PositionInChunk = Interpolants.LocalPosition;
+	const float3 CellPosition = clamp(floor(PositionInChunk), 0, ChunkSize - 1);
+	uint CellIndex = SampleTexture2D_UINT(IndirectionTexture, uint2(CellPosition.x, CellPosition.y + ChunkSize * CellPosition.z));
+
+	const uint Direction = CellIndex >> 14;
+	CellIndex &= ~(3u << 14);
+
+	float2 UVs = float2(CellIndex % NumCellsPerSide, CellIndex / NumCellsPerSide) * TextureSize;
+
+	float3 Delta = PositionInChunk - CellPosition;
+
+	const float2 LocalDelta =
+		Direction == 0
+		? Delta.yz
+		: Direction == 1
+		? Delta.xz
+		: Delta.xy;
+
+	// Skip 0.5 on each side to avoid leaking
+	UVs += 0.5f + LocalDelta * (TextureSize - 1);
+
+	UVs /= NumCellsPerSide * TextureSize;
+
+	float3 Normal;
+	{
+#if INTELLISENSE_PARSER
+		uint4 Octahedron_Corners;
+#else
+		const uint4 Octahedron_Corners = asuint(NormalTexture.GatherRed(TextureSampler, UVs));
+#endif
+
+		const float2 Octahedron0 = float2(
+			ByteToFloat(Octahedron_Corners[0] & 0xFF),
+			ByteToFloat(Octahedron_Corners[0] >> 8));
+
+		const float2 Octahedron1 = float2(
+			ByteToFloat(Octahedron_Corners[1] & 0xFF),
+			ByteToFloat(Octahedron_Corners[1] >> 8));
+
+		const float2 Octahedron2 = float2(
+			ByteToFloat(Octahedron_Corners[2] & 0xFF),
+			ByteToFloat(Octahedron_Corners[2] >> 8));
+
+		const float2 Octahedron3 = float2(
+			ByteToFloat(Octahedron_Corners[3] & 0xFF),
+			ByteToFloat(Octahedron_Corners[3] >> 8));
+
+		const float3 Normal0 = OctahedronToUnitVector(Octahedron0 * 2.f - 1.f);
+		const float3 Normal1 = OctahedronToUnitVector(Octahedron1 * 2.f - 1.f);
+		const float3 Normal2 = OctahedronToUnitVector(Octahedron2 * 2.f - 1.f);
+		const float3 Normal3 = OctahedronToUnitVector(Octahedron3 * 2.f - 1.f);
+
+		Normal = normalize(InterpolateGather(Normal0, Normal1, Normal2, Normal3, UVs, AtlasTextureSize));
+	}
+
+	const half3 TangentX = abs(Normal.x) > 0.99f ? float3(0, 1, 0) : float3(1, 0, 0);
+	const half3 TangentZ = Normal;
+	const half3 TangentY = cross(TangentZ, TangentX);
+	
+	float3x3 TangentToLocal;
+	TangentToLocal[0] = normalize(cross(TangentY, TangentZ));
+	TangentToLocal[1] = normalize(TangentY);
+	TangentToLocal[2] = normalize(TangentZ);
+
+	float3x3 TangentToWorld = mul(TangentToLocal, GetLocalToWorld3x3());
+	TangentToWorld[0] = normalize(TangentToWorld[0]);
+	TangentToWorld[1] = normalize(TangentToWorld[1]);
+	TangentToWorld[2] = normalize(TangentToWorld[2]);
+
+	FMaterialPixelParameters Result = MakeInitializedMaterialPixelParameters();
+#if NUM_TEX_COORD_INTERPOLATORS > 0
+	Result.TexCoords[0] = LWCToFloat(LWCSubtract(SvPositionToResolvedTranslatedWorld(SvPosition), ResolvedView.PreViewTranslation)).xy / 100.f;
+#endif
+#if NUM_TEX_COORD_INTERPOLATORS > 1
+	Result.TexCoords[1] = UVs;
+#endif
+	Result.VertexColor = Texture2DSample(ColorTexture, TextureSampler, UVs);
+	Result.WorldNormal = normalize(TransformVector(Normal, GetLocalToWorld3x3()));
+	Result.TangentToWorld = TangentToWorld;
+	Result.TwoSidedSign = 1;
+	Result.UnMirrored = 1;
+	return Result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+half3x3 VertexFactoryGetTangentToLocal(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return half3x3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return TransformLocalToTranslatedWorld(Intermediates.Position);
+}
+float4 VertexFactoryGetWorldPosition(FPositionOnlyVertexFactoryInput Input)
+{
+	return TransformLocalToTranslatedWorld(float3(Input.PositionX, Input.PositionY, Input.PositionZ));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float3 VertexFactoryGetWorldNormal(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return RotateLocalToWorld(float3(0, 0, 1));
+}
+float3 VertexFactoryGetWorldNormal(FPositionAndNormalOnlyVertexFactoryInput Input)
+{
+	return RotateLocalToWorld(float3(0, 0, 1));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetRasterizedWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float4 InWorldPosition)
+{
+	return InWorldPosition;
+}
+float3 VertexFactoryGetPositionForVertexLighting(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float3 TranslatedWorldPosition)
+{
+	return TranslatedWorldPosition;
+}
+
+float4 VertexFactoryGetPreviousWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+    return mul(float4(Intermediates.Position, 1), LWCMultiplyTranslation(Intermediates.SceneData.InstanceData.PrevLocalToWorld, ResolvedView.PrevPreViewTranslation));
+}
+
+float4 VertexFactoryGetTranslatedPrimitiveVolumeBounds(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	FPrimitiveSceneData PrimitiveData = GetPrimitiveDataFromUniformBuffer();
+	return float4(LWCToFloat(LWCAdd(PrimitiveData.ObjectWorldPosition, ResolvedView.PreViewTranslation)), PrimitiveData.ObjectRadius);
+}
+
+uint VertexFactoryGetPrimitiveId(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	return 0;
+}
+
+struct FVertexFactoryInputDummy
+{
+};
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInputDummy
+#include "/Engine/Private/VertexFactoryDefaultInterface.ush"
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput

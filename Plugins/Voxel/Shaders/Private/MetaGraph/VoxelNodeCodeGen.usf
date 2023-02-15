@@ -1,0 +1,54 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint Num;
+
+DECLARE_SCALAR_ARRAY(uint, ByteBuffersConstant, 8);
+DECLARE_SCALAR_ARRAY(uint, FloatBuffersConstant, 8);
+DECLARE_SCALAR_ARRAY(uint, Int32BuffersConstant, 8);
+
+#define DEFINE_BUFFER(Type, Name) \
+	Type Name ## _0; \
+	Type Name ## _1; \
+	Type Name ## _2; \
+	Type Name ## _3; \
+	Type Name ## _4; \
+	Type Name ## _5; \
+	Type Name ## _6; \
+	Type Name ## _7;
+
+DEFINE_BUFFER(Buffer<uint>, ByteBuffersIn);
+DEFINE_BUFFER(Buffer<float>, FloatBuffersIn);
+DEFINE_BUFFER(Buffer<int>, Int32BuffersIn);
+
+DEFINE_BUFFER(RWBuffer<uint>, ByteBuffersOut);
+DEFINE_BUFFER(RWBuffer<float>, FloatBuffersOut);
+DEFINE_BUFFER(RWBuffer<int>, Int32BuffersOut);
+
+#define LoadByte(BufferIndex) ByteBuffersIn_ ## BufferIndex[GET_SCALAR_ARRAY_ELEMENT(ByteBuffersConstant, BufferIndex) ? 0 : Index]
+#define LoadFloat(BufferIndex) FloatBuffersIn_ ## BufferIndex[GET_SCALAR_ARRAY_ELEMENT(FloatBuffersConstant, BufferIndex) ? 0 : Index]
+#define LoadInt32(BufferIndex) Int32BuffersIn_ ## BufferIndex[GET_SCALAR_ARRAY_ELEMENT(Int32BuffersConstant, BufferIndex) ? 0 : Index]
+
+#define StoreByte(BufferIndex, Value) ByteBuffersOut_ ## BufferIndex[Index] = Value
+#define StoreFloat(BufferIndex, Value) FloatBuffersOut_ ## BufferIndex[Index] = Value
+#define StoreInt32(BufferIndex, Value) Int32BuffersOut_ ## BufferIndex[Index] = Value
+
+#define MakeFloat2 float2
+#define MakeFloat3 float3
+#define MakeFloat4 float4
+
+#define MakeInt2 int2
+#define MakeInt3 int3
+
+[numthreads(64, 1, 1)]
+void Main(uint DispatchThreadId : SV_DispatchThreadID)
+{
+	const uint Index = DispatchThreadId;
+	if (Index >= Num)
+	{
+		return;
+	}
+
+#include "VoxelNodeCodeGen.ush"
+}

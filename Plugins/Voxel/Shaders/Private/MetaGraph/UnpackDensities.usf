@@ -1,0 +1,27 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint3 BlockSize;
+Buffer<float> InDensities;
+RWBuffer<float> OutDensities;
+
+[numthreads(4, 4, 4)]
+void Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	if (any(DispatchThreadId >= BlockSize))
+	{
+		return;
+	}
+
+	const uint BlockIndex = Get3DIndex(BlockSize, DispatchThreadId);
+
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(0, 0, 0))] = InDensities[8 * BlockIndex + 0];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(1, 0, 0))] = InDensities[8 * BlockIndex + 1];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(0, 1, 0))] = InDensities[8 * BlockIndex + 2];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(1, 1, 0))] = InDensities[8 * BlockIndex + 3];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(0, 0, 1))] = InDensities[8 * BlockIndex + 4];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(1, 0, 1))] = InDensities[8 * BlockIndex + 5];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(0, 1, 1))] = InDensities[8 * BlockIndex + 6];
+	OutDensities[Get3DIndex(2 * BlockSize, 2 * DispatchThreadId + uint3(1, 1, 1))] = InDensities[8 * BlockIndex + 7];
+}

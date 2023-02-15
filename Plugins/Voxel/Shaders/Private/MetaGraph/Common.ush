@@ -1,0 +1,462 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "../Common.ush"
+
+float SmoothHelper(float Value, float Smoothness)
+{
+#if 1 // Seems to work even when Smoothness == 0
+	return Value / Smoothness;
+#else
+	return Smoothness == 0.f
+		? Value < 0.f ? -1.f : 1.f
+		: Value / Smoothness;
+#endif
+}
+
+float SmoothMin(float DistanceA, float DistanceB, float Smoothness)
+{
+	const float H = clamp(0.5f + 0.5f * SmoothHelper(DistanceB - DistanceA, Smoothness), 0.0f, 1.0f);
+	return lerp(DistanceB, DistanceA, H) - Smoothness * H * (1.0f - H);
+}
+
+float SmoothMax(float DistanceA, float DistanceB, float Smoothness)
+{
+	const float H = clamp(0.5f - 0.5f * SmoothHelper(DistanceB - DistanceA, Smoothness), 0.0f, 1.0f);
+	return lerp(DistanceB, DistanceA, H) + Smoothness * H * (1.0f - H);
+}
+
+// Subtract DistanceB from DistanceA
+// DistanceB should be negative/inverted
+float SmoothSubtraction(float DistanceA, float DistanceB, float Smoothness)
+{
+	const float H = clamp(0.5f + 0.5f * SmoothHelper(DistanceB - DistanceA, Smoothness), 0.0f, 1.0f);
+	return lerp(DistanceA, DistanceB, H) + Smoothness * H * (1.0f - H);
+}
+
+float BilinearInterpolation(float A, float B, float C, float D, float X, float Y)
+{
+	return lerp(lerp(A, B, X), lerp(C, D, X), Y);
+}
+
+float TrilinearInterpolation(
+	float A, float B, float C, float D,
+	float E, float F, float G, float H,
+	float X, float Y, float Z)
+{
+	return lerp(
+		BilinearInterpolation(A, B, C, D, X, Y),
+		BilinearInterpolation(E, F, G, H, X, Y),
+		Z);
+}
+
+float SmoothStep(float A, float B, float Alpha)
+{
+	if (Alpha < A)
+	{
+		return 0.f;
+	}
+	else if (Alpha >= B)
+	{
+		return 1.f;
+	}
+
+	const float InterpFraction = (Alpha - A) / (B - A);
+	return InterpFraction * InterpFraction * (3.0f - 2.0f * InterpFraction);
+}
+
+float4 MakeQuaternionFromEuler(float Pitch, float Yaw, float Roll)
+{
+	float SinPitch;
+	float CosPitch;
+	sincos(fmod(Pitch, 360.0f) * PI / 360.f, SinPitch, CosPitch);
+
+	float SinYaw;
+	float CosYaw;
+	sincos(fmod(Yaw, 360.0f) * PI / 360.f, SinYaw, CosYaw);
+
+	float SinRoll;
+	float CosRoll;
+	sincos(fmod(Roll, 360.0f) * PI / 360.f, SinRoll, CosRoll);
+
+	return float4(
+		CosRoll * SinPitch * SinYaw - SinRoll * CosPitch * CosYaw,
+		-CosRoll * SinPitch * CosYaw - SinRoll * CosPitch * SinYaw,
+		CosRoll * CosPitch * SinYaw - SinRoll * SinPitch * CosYaw,
+		CosRoll * CosPitch * CosYaw + SinRoll * SinPitch * SinYaw);
+}
+float4 MakeQuaternionFromBasis(const float3 X, const float3 Y, const float3 Z)
+{
+	float4 Quat;
+
+	if (X.x + Y.y + Z.z > 0.0f)
+	{
+		const float InvS = rsqrt(X.x + Y.y + Z.z + 1.0f);
+		const float S = 0.5f * InvS;
+
+		Quat.x = (Y.z - Z.y) * S;
+		Quat.y = (Z.x - X.z) * S;
+		Quat.z = (X.y - Y.x) * S;
+		Quat.w = 0.5f * (1.f / InvS);
+	}
+	else if (X.x > Y.y && X.x > Z.z)
+	{
+		const float InvS = rsqrt(X.x - Y.y - Z.z + 1.0f);
+		const float S = 0.5f * InvS;
+
+		Quat.x = 0.5f * (1.f / InvS);
+		Quat.y = (X.y + Y.x) * S;
+		Quat.z = (X.z + Z.x) * S;
+		Quat.w = (Y.z - Z.y) * S;
+	}
+	else if (Y.y > X.x && Y.y > Z.z)
+	{
+		const float InvS = rsqrt(Y.y - Z.z - X.x + 1.0f);
+		const float S = 0.5f * InvS;
+
+		Quat.y = 0.5f * (1.f / InvS);
+		Quat.z = (Y.z + Z.y) * S;
+		Quat.x = (Y.x + X.y) * S;
+		Quat.w = (Z.x - X.z) * S;
+	}
+	else
+	{
+		const float InvS = rsqrt(Z.z - X.x - Y.y + 1.0f);
+		const float S = 0.5f * InvS;
+
+		Quat.z = 0.5f * (1.f / InvS);
+		Quat.x = (Z.x + X.z) * S;
+		Quat.y = (Z.y + Y.z) * S;
+		Quat.w = (X.y - Y.x) * S;
+	}
+
+	return Quat;
+}
+float4 MakeQuaternionFromZ(const float3 Z)
+{
+	const float3 NewZ = normalize(Z);
+
+	// Try to use up if possible
+	const float3 UpVector = abs(NewZ.z) < (1.f - KINDA_SMALL_NUMBER) ? float3(0, 0, 1.f) : float3(1.f, 0, 0);
+
+	const float3 NewX = normalize(cross(UpVector, NewZ));
+	const float3 NewY = cross(NewZ, NewX);
+
+	return MakeQuaternionFromBasis(NewX, NewY, NewZ);
+}
+
+// Noise functions below are based off FastNoise2, whose license is below
+//
+// MIT License
+// 
+// Copyright (c) 2020 Jordan Peck
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+float InterpQuintic(const float Value)
+{
+	return Value * Value * Value * (Value * (Value * 6.f - 15.f) + 10.f);
+}
+float2 InterpQuintic(const float2 Value)
+{
+	return float2(InterpQuintic(Value.x), InterpQuintic(Value.y));
+}
+float3 InterpQuintic(const float3 Value)
+{
+	return float3(InterpQuintic(Value.x), InterpQuintic(Value.y), InterpQuintic(Value.z));
+}
+
+#define NoisePrimes_X ((uint)501125321)
+#define NoisePrimes_Y ((uint)1136930381)
+#define NoisePrimes_Z ((uint)1720413743)
+#define NoisePrimes_W ((uint)1066037191)
+
+#define NoisePrimes_int2 int2(NoisePrimes_X, NoisePrimes_Y)
+#define NoisePrimes_int3 int3(NoisePrimes_X, NoisePrimes_Y, NoisePrimes_Z)
+
+#define Sqrt2 1.4142135623730950488f
+#define Sqrt3 1.7320508075688772935f
+
+float GetGradientDot(const int Hash, const float X, const float Y)
+{
+	const float A = 1.f;
+	const float B = 1.f + Sqrt2;
+
+	const float GradientX = ((Hash & 1) ? -1.f : 1.f) * ((Hash & 4) ? A : B);
+	const float GradientY = ((Hash & 2) ? -1.f : 1.f) * ((Hash & 4) ? B : A);
+
+	return GradientX * X + GradientY * Y;
+}
+float GetGradientDot(const int Hash, const float X, const float Y, const float Z)
+{
+	const int HashAnd13 = Hash & 13;
+
+	// If h < 8 then x, else y
+	const float U = HashAnd13 < 8 ? X : Y;
+
+	// If h < 4 then y else if h is 12 or 14 then x else z
+	const float V = HashAnd13 < 2 ? Y : HashAnd13 == 12 ? X : Z;
+
+	// If h1 then -u else u
+	// If h2 then -v else v
+	const float H1 = asfloat(Hash << 31);
+	const float H2 = asfloat((Hash & 2) << 30);
+
+	// Then add them
+	return asfloat(asint(U) ^ asint(H1)) + asfloat(asint(V) ^ asint(H2));
+}
+
+int HashPrimes(int Seed, int A, int B)
+{
+	int Hash = Seed;
+	Hash ^= (A ^ B);
+	Hash *= 0x27d4eb2d;
+	return (Hash >> 15) ^ Hash;
+}
+int HashPrimes(int Seed, int A, int B, int C)
+{
+	int Hash = Seed;
+	Hash ^= (A ^ B ^ C);
+	Hash *= 0x27d4eb2d;
+	return (Hash >> 15) ^ Hash;
+}
+
+int HashPrimesHB(int Seed, int A, int B)
+{
+	int Hash = Seed;
+	Hash ^= (A ^ B);
+	Hash *= 0x27d4eb2d;
+	return Hash;
+}
+int HashPrimesHB(int Seed, int A, int B, int C)
+{
+	int Hash = Seed;
+	Hash ^= (A ^ B ^ C);
+	Hash *= 0x27d4eb2d;
+	return Hash;
+}
+
+float GetPerlin2D(const int Seed, const float2 Position)
+{
+	const float2 Floor = floor(Position);
+
+	const int2 PositionA = int2(Floor) * NoisePrimes_int2;
+	const int2 PositionB = PositionA + NoisePrimes_int2; //  MakeInt2(Floor + 1) * NoisePrimes_int2;
+
+	const float2 AlphaA = Position - Floor;
+	const float2 AlphaB = AlphaA - 1.f; // Position - (Floor + 1)
+
+	const float2 QuinticAlpha = InterpQuintic(AlphaA);
+
+	return 0.579106986522674560546875f *
+		BilinearInterpolation(
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionA.y), AlphaA.x, AlphaA.y),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionA.y), AlphaB.x, AlphaA.y),
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionB.y), AlphaA.x, AlphaB.y),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionB.y), AlphaB.x, AlphaB.y),
+			QuinticAlpha.x,
+			QuinticAlpha.y);
+}
+
+float GetPerlin3D(const int Seed, const float3 Position)
+{
+	const float3 Floor = floor(Position);
+
+	const int3 PositionA = int3(Floor) * NoisePrimes_int3;
+	const int3 PositionB = PositionA + NoisePrimes_int3; // MakeInt3(Floor + 1) * NoisePrimes_int2;
+
+	const float3 AlphaA = Position - Floor;
+	const float3 AlphaB = AlphaA - 1.f; // Position - (Floor + 1)
+
+	const float3 QuinticAlpha = InterpQuintic(AlphaA);
+
+	return 0.964921414852142333984375f *
+		TrilinearInterpolation(
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionA.y, PositionA.z), AlphaA.x, AlphaA.y, AlphaA.z),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionA.y, PositionA.z), AlphaB.x, AlphaA.y, AlphaA.z),
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionB.y, PositionA.z), AlphaA.x, AlphaB.y, AlphaA.z),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionB.y, PositionA.z), AlphaB.x, AlphaB.y, AlphaA.z),
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionA.y, PositionB.z), AlphaA.x, AlphaA.y, AlphaB.z),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionA.y, PositionB.z), AlphaB.x, AlphaA.y, AlphaB.z),
+			GetGradientDot(HashPrimes(Seed, PositionA.x, PositionB.y, PositionB.z), AlphaA.x, AlphaB.y, AlphaB.z),
+			GetGradientDot(HashPrimes(Seed, PositionB.x, PositionB.y, PositionB.z), AlphaB.x, AlphaB.y, AlphaB.z),
+			QuinticAlpha.x,
+			QuinticAlpha.y,
+			QuinticAlpha.z);
+}
+
+float2 GetCellularDirection2D(const int Seed, const int2 HashPosition, const int IndexX, const int IndexY)
+{
+	const int Hash = HashPrimesHB(
+		Seed,
+		HashPosition.x + IndexX * NoisePrimes_X,
+		HashPosition.y + IndexY * NoisePrimes_Y);
+
+	return normalize(float2(
+		((Hash >> 0) & MAX_uint16) - MAX_uint16 / 2.0f,
+		((Hash >> 16) & MAX_uint16) - MAX_uint16 / 2.0f
+	));
+}
+
+float3 GetCellularDirection3D(const int Seed, const int3 HashPosition, const int IndexX, const int IndexY, const int IndexZ)
+{
+	const int Hash = HashPrimesHB(
+		Seed,
+		HashPosition.x + IndexX * NoisePrimes_X,
+		HashPosition.y + IndexY * NoisePrimes_Y,
+		HashPosition.z + IndexZ * NoisePrimes_Z);
+
+	const int TenBits = (1 << 10) - 1;
+	return normalize(float3(
+		((Hash >> 0) & TenBits) - TenBits / 2.0f,
+		((Hash >> 10) & TenBits) - TenBits / 2.0f,
+		((Hash >> 20) & TenBits) - TenBits / 2.0f
+	));
+}
+
+float GetCellularNoise2D(const int Seed, const float2 Position, const float Jitter)
+{
+	const float ScaledJitter = Jitter / 4.f;
+
+	float Distance = 0;
+
+	const float2 Floor = floor(Position);
+	const float2 LocalPosition = Position - Floor;
+	const int2 HashPosition = int2(Floor) * NoisePrimes_int2;
+
+	UNROLL
+	for (int IndexX = -1; IndexX < 2; IndexX++)
+	{
+		UNROLL
+		for (int IndexY = -1; IndexY < 2; IndexY++)
+		{
+			const float2 Direction = GetCellularDirection2D(Seed, HashPosition, IndexX, IndexY);
+			const float2 Center = float2(IndexX, IndexY) + ScaledJitter * Direction;
+			const float NewDistance = DistanceSquared(Center, LocalPosition);
+
+			if (IndexX == -1 && IndexY == -1)
+			{
+				Distance = NewDistance;
+			}
+			else
+			{
+				Distance = min(Distance, NewDistance);
+			}
+		}
+	}
+
+	return sqrt(Distance);
+}
+
+float GetCellularNoise3D(const int Seed, const float3 Position, const float Jitter)
+{
+	const float ScaledJitter = Jitter / 4.f;
+
+	float Distance = 0;
+
+	const float3 Floor = floor(Position);
+	const float3 LocalPosition = Position - Floor;
+	const int3 HashPosition = int3(Floor) * NoisePrimes_int3;
+
+	UNROLL
+	for (int IndexX = -1; IndexX < 2; IndexX++)
+	{
+		UNROLL
+		for (int IndexY = -1; IndexY < 2; IndexY++)
+		{
+			UNROLL
+			for (int IndexZ = -1; IndexZ < 2; IndexZ++)
+			{
+				const float3 Direction = GetCellularDirection3D(Seed, HashPosition, IndexX, IndexY, IndexZ);
+				const float3 Center = float3(IndexX, IndexY, IndexZ) + ScaledJitter * Direction;
+				const float NewDistance = DistanceSquared(Center, LocalPosition);
+
+				if (IndexX == -1 && IndexY == -1 && IndexZ == -1)
+				{
+					Distance = NewDistance;
+				}
+				else
+				{
+					Distance = min(Distance, NewDistance);
+				}
+			}
+		}
+	}
+
+	return sqrt(Distance);
+}
+
+float GetTrueDistanceCellularNoise2D(const int Seed, const float2 Position, const float Jitter, out float2 CellPosition)
+{
+	const float ScaledJitter = Jitter / 4.f;
+
+	float DistanceToCenter = 0.f;
+	float2 MinCenter;
+	int2 MinIndices;
+
+	const float2 Floor = floor(Position);
+	const float2 LocalPosition = Position - Floor;
+	const int2 HashPosition = int2(Floor) * NoisePrimes_int2;
+
+	UNROLL
+	for (int IndexX = -1; IndexX <= 2; IndexX++)
+	{
+		UNROLL
+		for (int IndexY = -1; IndexY <= 2; IndexY++)
+		{
+			const float2 Direction = GetCellularDirection2D(Seed, HashPosition, IndexX, IndexY);
+			const float2 Center = float2(IndexX, IndexY) + ScaledJitter * Direction;
+			const float NewDistance = DistanceSquared(Center, LocalPosition);
+
+			if ((IndexX == -1 && IndexY == -1) || NewDistance < DistanceToCenter)
+			{
+				DistanceToCenter = NewDistance;
+				MinCenter = Center;
+				MinIndices = int2(IndexX, IndexY);
+			}
+		}
+	}
+
+	CellPosition = Floor + MinCenter;
+
+	float DistanceToEdge = 1e9;
+
+	UNROLL
+	for (int IndexX = -1; IndexX <= 2; IndexX++)
+	{
+		UNROLL
+		for (int IndexY = -1; IndexY <= 2; IndexY++)
+		{
+			FLATTEN
+			if (MinIndices.x == IndexX &&
+				MinIndices.y == IndexY)
+			{
+				continue;
+			}
+
+			const float2 Direction = GetCellularDirection2D(Seed, HashPosition, IndexX, IndexY);
+			const float2 Center = float2(IndexX, IndexY) + ScaledJitter * Direction;
+
+			DistanceToEdge = min(DistanceToEdge, dot((MinCenter + Center) / 2.f - LocalPosition, normalize(Center - MinCenter)));
+		}
+	}
+
+	return sqrt(DistanceToEdge);
+}

@@ -1,0 +1,406 @@
+// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "/Engine/Private/VertexFactoryCommon.ush"
+
+// NOTES
+// Primitive is FPrimitiveUniformShaderParameters, set in FMeshMaterialShader::GetElementShaderBindings
+
+#ifndef VOXEL_CHUNK_SIZE
+#define VOXEL_CHUNK_SIZE 32
+#error "XXX"
+#endif
+
+float ScaledVoxelSize;
+Buffer<uint2> Quads;
+
+/*
+struct FVoxelPackedQuad0
+{
+	uint32 Direction   : 3;  // 0-2
+	uint32 Layer       : 5;  // 3-7
+	uint32 StartX      : 5;  // 8-12
+	uint32 StartY      : 5;  // 13-17
+	uint32 SizeXMinus1 : 5;  // 18-22
+	uint32 SizeYMinus1 : 5;  // 23-27
+	uint32 ChunkX      : 4;  // 28-31 
+};
+
+struct FVoxelPackedQuad1
+{
+	uint32 ChunkY       :  4;  // 0-3
+	uint32 ChunkZ       :  4;  // 4-7
+	uint32 TextureIndex : 24;  // 8-31
+};
+*/
+
+uint GetDirectionFromPackedQuad(uint2 Quad)
+{
+	return Quad.x & 0x7;
+}
+uint GetLayerFromPackedQuad0(uint2 Quad)
+{
+	return (Quad.x >> 3) & 0x1F;
+}
+uint GetStartXFromPackedQuad(uint2 Quad)
+{
+	return (Quad.x >> 8) & 0x1F;
+}
+uint GetStartYFromPackedQuad(uint2 Quad)
+{
+	return (Quad.x >> 13) & 0x1F;
+}
+uint GetSizeXFromPackedQuad(uint2 Quad)
+{
+	return 1 + ((Quad.x >> 18) & 0x1F);
+}
+uint GetSizeYFromPackedQuad(uint2 Quad)
+{
+	return 1 + ((Quad.x >> 23) & 0x1F);
+}
+
+uint GetChunkXFromPackedQuad(uint2 Quad)
+{
+	return (Quad.x >> 28) & 0xF;
+}
+uint GetChunkYFromPackedQuad(uint2 Quad)
+{
+	return Quad.y & 0xF;
+}
+uint GetChunkZFromPackedQuad(uint2 Quad)
+{
+	return (Quad.y >> 4) & 0xF;
+}
+
+uint GetTextureIndexFromPackedQuad(uint2 Quad)
+{
+	return Quad.y >> 8;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+struct FVertexFactoryInput
+{
+	uint VertexId : SV_VertexID;
+};
+
+// Position only / Position & Normal are used for optimized depth/shadow passes
+#define FPositionOnlyVertexFactoryInput FVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput
+
+struct FVertexFactoryInterpolantsVSToPS
+{
+	TANGENTTOWORLD_INTERPOLATOR_BLOCK
+
+	float2 TexCoords : TEXCOORD0;
+	nointerpolation float2 TextureIndexAndQuadWidth : TEXTURE_INDEX_QUAD_WIDTH;
+
+#if INSTANCED_STEREO
+	nointerpolation uint EyeIndex : PACKED_EYE_INDEX;
+#endif
+};
+
+struct FVertexFactoryIntermediates
+{
+	float3 Position;
+	float2 TexCoords;
+	float2 TextureIndexAndQuadWidth;
+
+    half3x3 TangentToLocal;
+    half3x3 TangentToWorld;
+    half TangentToWorldSign;
+
+	/** Cached primitive and instance data */
+	FSceneDataIntermediates SceneData;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+half3x3 CalcTangentToLocal(half3 TangentX, half4 TangentZ, out float TangentSign)
+{
+	half3x3 Result;
+
+	TangentSign = TangentZ.w;
+
+	// derive the binormal by getting the cross product of the normal and tangent
+	half3 TangentY = cross(TangentZ.xyz, TangentX) * TangentZ.w;
+
+	// Recalculate TangentX off of the other two vectors
+	// This corrects quantization error since TangentX was passed in as a quantized vertex input
+	// The error shows up most in specular off of a mesh with a smoothed UV seam (normal is smooth, but tangents vary across the seam)
+	Result[0] = cross(TangentY, TangentZ.xyz) * TangentZ.w;
+	Result[1] = TangentY;
+	Result[2] = TangentZ.xyz;
+
+	return Result;
+}
+
+half3x3 CalcTangentToWorldNoScale(half3x3 TangentToLocal)
+{
+	half3x3 LocalToWorld = GetLocalToWorld3x3();
+	half3 InvScale = Primitive.InvNonUniformScale;
+	LocalToWorld[0] *= InvScale.x;
+	LocalToWorld[1] *= InvScale.y;
+	LocalToWorld[2] *= InvScale.z;
+	return mul(TangentToLocal, LocalToWorld);
+}
+
+float4 CalcWorldPosition(float3 Position)
+{
+	return TransformLocalToTranslatedWorld(Position);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * 2 --- 3
+ * |  /  |
+ * 0 --- 1
+ *
+ * Regular Triangles: 0 2 3 0 3 1
+ * Reversed Triangles: 3 2 0 1 3 0
+ */
+
+//const uint RegularTrianglesX = (bool(0 & 0x1) << 0) + (bool(2 & 0x1) << 1) + (bool(3 & 0x1) << 2) + (bool(0 & 0x1) << 3) + (bool(3 & 0x1) << 4) + (bool(1 & 0x1) << 5);
+
+#define RegularTrianglesX 52
+#define RegularTrianglesY 22
+#define ReversedTrianglesX 25
+#define ReversedTrianglesY 19
+
+void UnpackQuad(
+	uint VertexId, 
+	out float3 OutPosition,
+	out float2 OutTexCoords,
+	out float2 OutTextureIndexAndQuadWidth,
+	out half3 OutTangentX, 
+	out half4 OutTangentZ)
+{
+	const uint QuadIndex = VertexId / 6;
+	const uint VertexIndex = VertexId % 6;
+
+	const uint2 Quad = Quads[QuadIndex];
+
+	const uint Direction = GetDirectionFromPackedQuad(Quad);
+	const uint Layer = GetLayerFromPackedQuad0(Quad);
+
+	const uint StartX = GetStartXFromPackedQuad(Quad);
+	const uint StartY = GetStartYFromPackedQuad(Quad);
+
+	const uint SizeX = GetSizeXFromPackedQuad(Quad);
+	const uint SizeY = GetSizeYFromPackedQuad(Quad);
+
+	const uint3 ChunkPosition = uint3(
+		GetChunkXFromPackedQuad(Quad),
+		GetChunkYFromPackedQuad(Quad),
+		GetChunkZFromPackedQuad(Quad));
+
+	const uint TextureIndex = GetTextureIndexFromPackedQuad(Quad);
+
+	const uint ZAxis = Direction / 2;
+	const uint3 Axes = uint3((ZAxis + 1) % 3, (ZAxis + 2) % 3, ZAxis);
+	const bool bIsInverted = Direction & 0x1;
+
+	const bool bTriangleX = (1 << VertexIndex) & (bIsInverted * RegularTrianglesX + (!bIsInverted) * ReversedTrianglesX);
+	const bool bTriangleY = (1 << VertexIndex) & (bIsInverted * RegularTrianglesY + (!bIsInverted) * ReversedTrianglesY);
+
+	{
+		uint Position[3];
+		Position[Axes.x] = StartX + SizeX * bTriangleX;
+		Position[Axes.y] = StartY + SizeY * bTriangleY;
+		Position[Axes.z] = Layer + bIsInverted;
+
+		OutPosition = float3(Position[0], Position[1], Position[2]);
+		OutPosition += ChunkPosition * VOXEL_CHUNK_SIZE;
+		OutPosition *= ScaledVoxelSize;
+	}
+
+	OutTexCoords = float2(SizeX * bTriangleX, SizeY * bTriangleY);
+	OutTextureIndexAndQuadWidth = float2(TextureIndex, SizeX);
+
+	{
+		half TangentX[3];
+		TangentX[0] = 0.f;
+		TangentX[1] = 0.f;
+		TangentX[2] = 0.f;
+		TangentX[Axes.x] = 1.f;
+
+		OutTangentX = half3(TangentX[0], TangentX[1], TangentX[2]);
+	}
+
+	{
+		half TangentZ[3];
+		TangentZ[0] = 0.f;
+		TangentZ[1] = 0.f;
+		TangentZ[2] = 0.f;
+		TangentZ[Axes.z] = bIsInverted * 2.f - 1.f; // bIsInverted ? 1 : -1
+
+		OutTangentZ = half4(TangentZ[0], TangentZ[1], TangentZ[2], 0.f);
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+FVertexFactoryIntermediates GetVertexFactoryIntermediates(FVertexFactoryInput Input)
+{
+	FVertexFactoryIntermediates Intermediates = (FVertexFactoryIntermediates)0;
+	Intermediates.SceneData = VF_GPUSCENE_GET_INTERMEDIATES(Input);
+
+	half3 TangentX;
+	half4 TangentZ;
+	UnpackQuad(Input.VertexId, Intermediates.Position, Intermediates.TexCoords, Intermediates.TextureIndexAndQuadWidth, TangentX, TangentZ);
+
+	float TangentSign;
+	Intermediates.TangentToLocal = CalcTangentToLocal(TangentX, TangentZ, TangentSign);
+	Intermediates.TangentToWorld = CalcTangentToWorldNoScale(Intermediates.TangentToLocal);
+	Intermediates.TangentToWorldSign = Intermediates.SceneData.InstanceData.DeterminantSign;
+
+	return Intermediates;
+}
+
+FMaterialVertexParameters GetMaterialVertexParameters(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float3 WorldPosition, half3x3 TangentToLocal)
+{
+	FMaterialVertexParameters Result = (FMaterialVertexParameters)0;
+	Result.SceneData = Intermediates.SceneData;
+	Result.WorldPosition = WorldPosition;
+	Result.TangentToWorld = Intermediates.TangentToWorld;
+	Result.PreSkinnedPosition = WorldPosition;
+	Result.PreSkinnedNormal = TangentToLocal[2];
+
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 0
+	Result.TexCoords[0] = Intermediates.TexCoords;
+#endif
+#if NUM_MATERIAL_TEXCOORDS_VERTEX > 1
+	Result.TexCoords[1] = Intermediates.TextureIndexAndQuadWidth;
+#endif
+
+	return Result;
+}
+
+FVertexFactoryInterpolantsVSToPS VertexFactoryGetInterpolantsVSToPS(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, FMaterialVertexParameters VertexParameters)
+{
+	FVertexFactoryInterpolantsVSToPS Interpolants = (FVertexFactoryInterpolantsVSToPS)0;
+	Interpolants.TangentToWorld0 = float4(Intermediates.TangentToWorld[0], 0);
+	Interpolants.TangentToWorld2 = float4(Intermediates.TangentToWorld[2], Intermediates.TangentToWorldSign);
+	Interpolants.TexCoords = Intermediates.TexCoords;
+	Interpolants.TextureIndexAndQuadWidth = Intermediates.TextureIndexAndQuadWidth;
+
+#if INSTANCED_STEREO
+	Interpolants.EyeIndex = 0;
+#endif
+
+	return Interpolants;
+}
+
+FMaterialPixelParameters GetMaterialPixelParameters(FVertexFactoryInterpolantsVSToPS Interpolants, float4 SvPosition)
+{
+	FMaterialPixelParameters Result = MakeInitializedMaterialPixelParameters();
+
+#if NUM_TEX_COORD_INTERPOLATORS > 0
+	Result.TexCoords[0] = Interpolants.TexCoords;
+#endif
+#if NUM_TEX_COORD_INTERPOLATORS > 1
+	Result.TexCoords[1] = Interpolants.TextureIndexAndQuadWidth;
+#endif
+
+	half3 TangentToWorld0 = Interpolants.TangentToWorld0.xyz;
+	half4 TangentToWorld2 = Interpolants.TangentToWorld2;
+	Result.UnMirrored = TangentToWorld2.w;
+
+	// Required for previewing materials that use ParticleColor
+	Result.Particle.Color = half4(1, 1, 1, 1);
+	Result.TangentToWorld = AssembleTangentToWorld(TangentToWorld0, TangentToWorld2);
+
+	Result.TwoSidedSign = 1;
+
+	return Result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+half3x3 VertexFactoryGetTangentToLocal(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return Intermediates.TangentToLocal;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return CalcWorldPosition(Intermediates.Position);
+}
+// Depth-only pass
+float4 VertexFactoryGetWorldPosition(FPositionOnlyVertexFactoryInput Input)
+{
+	float3 Position;
+	float2 TexCoords;
+	float2 TextureIndexAndQuadWidth;
+	half3 TangentX;
+	half4 TangentZ;
+	UnpackQuad(Input.VertexId, Position, TexCoords, TextureIndexAndQuadWidth, TangentX, TangentZ);
+
+	return CalcWorldPosition(Position);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float3 VertexFactoryGetWorldNormal(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+	return Intermediates.TangentToWorld[2];
+}
+float3 VertexFactoryGetWorldNormal(FPositionAndNormalOnlyVertexFactoryInput Input)
+{
+	float3 Position;
+	float2 TexCoords;
+	float2 TextureIndexAndQuadWidth;
+	half3 TangentX;
+	half4 TangentZ;
+	UnpackQuad(Input.VertexId, Position, TexCoords, TextureIndexAndQuadWidth, TangentX, TangentZ);
+
+	return RotateLocalToWorld(TangentZ.xyz);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+float4 VertexFactoryGetRasterizedWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float4 InWorldPosition)
+{
+	return InWorldPosition;
+}
+float3 VertexFactoryGetPositionForVertexLighting(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates, float3 TranslatedWorldPosition)
+{
+	return TranslatedWorldPosition;
+}
+
+float4 VertexFactoryGetPreviousWorldPosition(FVertexFactoryInput Input, FVertexFactoryIntermediates Intermediates)
+{
+    return mul(float4(Intermediates.Position, 1), LWCMultiplyTranslation(Intermediates.SceneData.InstanceData.PrevLocalToWorld, ResolvedView.PrevPreViewTranslation));
+}
+
+float4 VertexFactoryGetTranslatedPrimitiveVolumeBounds(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	FPrimitiveSceneData PrimitiveData = GetPrimitiveDataFromUniformBuffer();
+	return float4(LWCToFloat(LWCAdd(PrimitiveData.ObjectWorldPosition, ResolvedView.PreViewTranslation)), PrimitiveData.ObjectRadius);
+}
+
+uint VertexFactoryGetPrimitiveId(FVertexFactoryInterpolantsVSToPS Interpolants)
+{
+	return 0;
+}
+
+struct FVertexFactoryInputDummy
+{
+};
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInputDummy
+#include "/Engine/Private/VertexFactoryDefaultInterface.ush"
+#undef FPositionAndNormalOnlyVertexFactoryInput
+#define FPositionAndNormalOnlyVertexFactoryInput FVertexFactoryInput

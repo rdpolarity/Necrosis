@@ -1,0 +1,2011 @@
+FORCEINLINE void Execute_VoxelNode_Abs(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = abs(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Abs_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = abs(Value);
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Acos(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = acos(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_AcosDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = 180.f / PI * acos(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Add(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = A + B;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Add_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A + B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Asin(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = asin(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_AsinDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = 180.f / PI * asin(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Atan(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = atan(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Atan2(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Y = LoadFloat(Buffers[0], Index);
+		const float X = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = atan2(Y, X);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Atan2Degrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Y = LoadFloat(Buffers[0], Index);
+		const float X = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = 180.f / PI * atan2(Y, X);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_AtanDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = 180.f / PI * atan(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BilinearInterpolation(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Position = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float X0Y0 = LoadFloat(Buffers[2], Index);
+		const float X1Y0 = LoadFloat(Buffers[3], Index);
+		const float X0Y1 = LoadFloat(Buffers[4], Index);
+		const float X1Y1 = LoadFloat(Buffers[5], Index);
+		float ReturnValue;
+		
+		ReturnValue = BilinearInterpolation(X0Y0, X1Y0, X0Y1, X1Y1, Position.x, Position.y);
+		
+		StoreFloat(Buffers[6], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Bitwise_And(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A & B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Bitwise_Not(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = ~A;
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Bitwise_Or(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A | B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Bitwise_Xor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A ^ B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanAND(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A && B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanNAND(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = !(A && B);
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanNOR(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = !(A || B);
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanNOT(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		bool ReturnValue;
+		
+		ReturnValue = !A;
+		
+		StoreBool(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanOR(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A || B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BooleanXOR(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A != B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakIntPoint(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int2 Vector = MakeInt2(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index));
+		int32 X;
+		int32 Y;
+		
+		X = Vector.x;
+		Y = Vector.y;
+		
+		StoreInt32(Buffers[2], Index, X);
+		StoreInt32(Buffers[3], Index, Y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakIntVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int3 Vector = MakeInt3(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index), LoadInt32(Buffers[2], Index));
+		int32 X;
+		int32 Y;
+		int32 Z;
+		
+		X = Vector.x;
+		Y = Vector.y;
+		Z = Vector.z;
+		
+		StoreInt32(Buffers[3], Index, X);
+		StoreInt32(Buffers[4], Index, Y);
+		StoreInt32(Buffers[5], Index, Z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakLinearColor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float4 Color = MakeFloat4(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float R;
+		float G;
+		float B;
+		float A;
+		
+		R = Color.x;
+		G = Color.y;
+		B = Color.z;
+		A = Color.w;
+		
+		StoreFloat(Buffers[4], Index, R);
+		StoreFloat(Buffers[5], Index, G);
+		StoreFloat(Buffers[6], Index, B);
+		StoreFloat(Buffers[7], Index, A);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakQuaternion(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float4 Quaternion = MakeFloat4(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float X;
+		float Y;
+		float Z;
+		float W;
+		
+		X = Quaternion.x;
+		Y = Quaternion.y;
+		Z = Quaternion.z;
+		W = Quaternion.w;
+		
+		StoreFloat(Buffers[4], Index, X);
+		StoreFloat(Buffers[5], Index, Y);
+		StoreFloat(Buffers[6], Index, Z);
+		StoreFloat(Buffers[7], Index, W);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float X;
+		float Y;
+		float Z;
+		
+		X = Vector.x;
+		Y = Vector.y;
+		Z = Vector.z;
+		
+		StoreFloat(Buffers[3], Index, X);
+		StoreFloat(Buffers[4], Index, Y);
+		StoreFloat(Buffers[5], Index, Z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_BreakVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Vector = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		float X;
+		float Y;
+		
+		X = Vector.x;
+		Y = Vector.y;
+		
+		StoreFloat(Buffers[2], Index, X);
+		StoreFloat(Buffers[3], Index, Y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Ceil(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = (int)ceil(Value);
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_CeilToFloat(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = ceil(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_CellularNoise2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Position = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float Jitter = LoadFloat(Buffers[2], Index);
+		const int32 Seed = LoadInt32(Buffers[3], Index);
+		float Value;
+		
+		Value = GetCellularNoise2D(Seed, Position, Jitter);
+		
+		StoreFloat(Buffers[4], Index, Value);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_CellularNoise3D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Position = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float Jitter = LoadFloat(Buffers[3], Index);
+		const int32 Seed = LoadInt32(Buffers[4], Index);
+		float Value;
+		
+		Value = GetCellularNoise3D(Seed, Position, Jitter);
+		
+		StoreFloat(Buffers[5], Index, Value);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Clamp(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		const float Min = LoadFloat(Buffers[1], Index);
+		const float Max = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = clamp(Value, Min, Max);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Clamp_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		const int32 Min = LoadInt32(Buffers[1], Index);
+		const int32 Max = LoadInt32(Buffers[2], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = clamp(Value, Min, Max);
+		
+		StoreInt32(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_ColorToVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float4 Color = MakeFloat4(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float3 ReturnValue;
+		
+		ReturnValue.x = Color.x;
+		ReturnValue.y = Color.y;
+		ReturnValue.z = Color.z;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+		StoreFloat(Buffers[6], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_ColorToVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float4 Color = MakeFloat4(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float2 ReturnValue;
+		
+		ReturnValue.x = Color.x;
+		ReturnValue.y = Color.y;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Conv_IntPointToVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int2 Vector = MakeInt2(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index));
+		float2 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue.x);
+		StoreFloat(Buffers[3], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Conv_IntToFloat(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = (float)Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Conv_IntVectorToVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int3 Vector = MakeInt3(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index), LoadInt32(Buffers[2], Index));
+		float3 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		ReturnValue.z = Vector.z;
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Conv_IntVectorToVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int3 Vector = MakeInt3(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index), LoadInt32(Buffers[2], Index));
+		float2 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Cos(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = cos(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_CosDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = cos(PI / 180.f * Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_DegreesToRadians(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = A * (PI / 180.f);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Density_Invert(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Density = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = -Density;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Density_SmoothIntersection(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothMax(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Density_SmoothSubtraction(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothSubtraction(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Density_SmoothUnion(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothMin(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_DensityToFloat(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Divide(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = A / B;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Divide_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		IGNORE_PERF_WARNING
+		ReturnValue = B != 0 ? A / B : 0;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_EqualEqual(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A == B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_EqualEqual_BoolBool(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A == B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_EqualEqual_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A == B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_FloatToColor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float4 ReturnValue;
+		
+		ReturnValue.x = Value;
+		ReturnValue.y = Value;
+		ReturnValue.z = Value;
+		ReturnValue.w = Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue.x);
+		StoreFloat(Buffers[2], Index, ReturnValue.y);
+		StoreFloat(Buffers[3], Index, ReturnValue.z);
+		StoreFloat(Buffers[4], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_FloatToDensity(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_FloatToVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float3 ReturnValue;
+		
+		ReturnValue.x = Value;
+		ReturnValue.y = Value;
+		ReturnValue.z = Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue.x);
+		StoreFloat(Buffers[2], Index, ReturnValue.y);
+		StoreFloat(Buffers[3], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_FloatToVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float2 ReturnValue;
+		
+		ReturnValue.x = Value;
+		ReturnValue.y = Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue.x);
+		StoreFloat(Buffers[2], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Floor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = (int)floor(Value);
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_FloorToFloat(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = floor(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Frac(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = Value - floor(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_GetPI(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		float ReturnValue;
+		
+		ReturnValue = PI;
+		
+		StoreFloat(Buffers[0], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Greater(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A > B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Greater_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A > B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_GreaterEqual(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A >= B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_GreaterEqual_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A >= B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Int32ToIntPoint(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		int2 ReturnValue;
+		
+		ReturnValue.x = Value;
+		ReturnValue.y = Value;
+		
+		StoreInt32(Buffers[1], Index, ReturnValue.x);
+		StoreInt32(Buffers[2], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Int32ToIntVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		int3 ReturnValue;
+		
+		ReturnValue.x = Value;
+		ReturnValue.y = Value;
+		ReturnValue.z = Value;
+		
+		StoreInt32(Buffers[1], Index, ReturnValue.x);
+		StoreInt32(Buffers[2], Index, ReturnValue.y);
+		StoreInt32(Buffers[3], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_IntPointToIntVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int2 Vector2D = MakeInt2(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index));
+		const int32 Z = LoadInt32(Buffers[2], Index);
+		int3 ReturnValue;
+		
+		ReturnValue.x = Vector2D.x;
+		ReturnValue.y = Vector2D.y;
+		ReturnValue.z = Z;
+		
+		StoreInt32(Buffers[3], Index, ReturnValue.x);
+		StoreInt32(Buffers[4], Index, ReturnValue.y);
+		StoreInt32(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_IntToSeed(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = Value;
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_IntVectorToIntPoint(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int3 Vector = MakeInt3(LoadInt32(Buffers[0], Index), LoadInt32(Buffers[1], Index), LoadInt32(Buffers[2], Index));
+		int2 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		
+		StoreInt32(Buffers[3], Index, ReturnValue.x);
+		StoreInt32(Buffers[4], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_LeftShift(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		const int32 Shift = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		IGNORE_PERF_WARNING
+		ReturnValue = Value << clamp(Shift, 0, 31);
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Lerp(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		const float Alpha = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = lerp(A, B, Alpha);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Less(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A < B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Less_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A < B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_LessEqual(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A <= B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_LessEqual_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A <= B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeDensityFromHeight(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Position = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float Height = LoadFloat(Buffers[3], Index);
+		float ReturnValue;
+		
+		ReturnValue = Position.z - Height;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeIntPoint(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 X = LoadInt32(Buffers[0], Index);
+		const int32 Y = LoadInt32(Buffers[1], Index);
+		int2 ReturnValue;
+		
+		ReturnValue.x = X;
+		ReturnValue.y = Y;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue.x);
+		StoreInt32(Buffers[3], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeIntVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 X = LoadInt32(Buffers[0], Index);
+		const int32 Y = LoadInt32(Buffers[1], Index);
+		const int32 Z = LoadInt32(Buffers[2], Index);
+		int3 ReturnValue;
+		
+		ReturnValue.x = X;
+		ReturnValue.y = Y;
+		ReturnValue.z = Z;
+		
+		StoreInt32(Buffers[3], Index, ReturnValue.x);
+		StoreInt32(Buffers[4], Index, ReturnValue.y);
+		StoreInt32(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeLinearColor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float R = LoadFloat(Buffers[0], Index);
+		const float G = LoadFloat(Buffers[1], Index);
+		const float B = LoadFloat(Buffers[2], Index);
+		const float A = LoadFloat(Buffers[3], Index);
+		float4 ReturnValue;
+		
+		ReturnValue.x = R;
+		ReturnValue.y = G;
+		ReturnValue.z = B;
+		ReturnValue.w = A;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+		StoreFloat(Buffers[6], Index, ReturnValue.z);
+		StoreFloat(Buffers[7], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeQuaternion(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float X = LoadFloat(Buffers[0], Index);
+		const float Y = LoadFloat(Buffers[1], Index);
+		const float Z = LoadFloat(Buffers[2], Index);
+		const float W = LoadFloat(Buffers[3], Index);
+		float4 ReturnValue;
+		
+		ReturnValue.x = X;
+		ReturnValue.y = Y;
+		ReturnValue.z = Z;
+		ReturnValue.w = W;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+		StoreFloat(Buffers[6], Index, ReturnValue.z);
+		StoreFloat(Buffers[7], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeRotationFromEuler(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Roll = LoadFloat(Buffers[0], Index);
+		const float Pitch = LoadFloat(Buffers[1], Index);
+		const float Yaw = LoadFloat(Buffers[2], Index);
+		float4 ReturnValue;
+		
+		ReturnValue = MakeQuaternionFromEuler(Pitch, Yaw, Roll);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+		StoreFloat(Buffers[6], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeRotationFromZ(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Z = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float4 ReturnValue;
+		
+		ReturnValue = MakeQuaternionFromZ(Z);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+		StoreFloat(Buffers[6], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float X = LoadFloat(Buffers[0], Index);
+		const float Y = LoadFloat(Buffers[1], Index);
+		const float Z = LoadFloat(Buffers[2], Index);
+		float3 ReturnValue;
+		
+		ReturnValue.x = X;
+		ReturnValue.y = Y;
+		ReturnValue.z = Z;
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MakeVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float X = LoadFloat(Buffers[0], Index);
+		const float Y = LoadFloat(Buffers[1], Index);
+		float2 ReturnValue;
+		
+		ReturnValue.x = X;
+		ReturnValue.y = Y;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue.x);
+		StoreFloat(Buffers[3], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MappedRangeValueClamped(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		const float InMin = LoadFloat(Buffers[1], Index);
+		const float InMax = LoadFloat(Buffers[2], Index);
+		const float OutMin = LoadFloat(Buffers[3], Index);
+		const float OutMax = LoadFloat(Buffers[4], Index);
+		float ReturnValue;
+		
+		ReturnValue = lerp(OutMin, OutMax, clamp((Value - InMin) / (InMax - InMin), 0.f, 1.f));
+		
+		StoreFloat(Buffers[5], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MappedRangeValueUnclamped(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		const float InMin = LoadFloat(Buffers[1], Index);
+		const float InMax = LoadFloat(Buffers[2], Index);
+		const float OutMin = LoadFloat(Buffers[3], Index);
+		const float OutMax = LoadFloat(Buffers[4], Index);
+		float ReturnValue;
+		
+		ReturnValue = lerp(OutMin, OutMax, (Value - InMin) / (InMax - InMin));
+		
+		StoreFloat(Buffers[5], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Max(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = max(A, B);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Max_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = max(A, B);
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Min(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = min(A, B);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Min_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = min(A, B);
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_MixSeeds(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = MurmurHash32(MurmurHash32(A) ^ B);
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Multiply(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = A * B;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Multiply_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A * B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NearlyEqual(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		const float ErrorTolerance = LoadFloat(Buffers[2], Index);
+		bool ReturnValue;
+		
+		ReturnValue = abs(A - B) <= ErrorTolerance;
+		
+		StoreBool(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NormalizeVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float3 ReturnValue;
+		
+		ReturnValue = normalize(Vector);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NormalizeVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Vector = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		float2 ReturnValue;
+		
+		ReturnValue = normalize(Vector);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue.x);
+		StoreFloat(Buffers[3], Index, ReturnValue.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NotEqual(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A != B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NotEqual_BoolBool(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const bool A = LoadBool(Buffers[0], Index);
+		const bool B = LoadBool(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A != B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_NotEqual_IntInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		bool ReturnValue;
+		
+		ReturnValue = A != B;
+		
+		StoreBool(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_OneMinus(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = 1 - Value;
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_PerlinNoise2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Position = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const int32 Seed = LoadInt32(Buffers[2], Index);
+		float Value;
+		
+		Value = GetPerlin2D(Seed, Position);
+		
+		StoreFloat(Buffers[3], Index, Value);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_PerlinNoise3D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Position = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const int32 Seed = LoadInt32(Buffers[3], Index);
+		float Value;
+		
+		Value = GetPerlin3D(Seed, Position);
+		
+		StoreFloat(Buffers[4], Index, Value);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Power(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Base = LoadFloat(Buffers[0], Index);
+		const float Exp = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = pow(abs(Base), Exp);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_RadiansToDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = A * (180.f / PI);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_RightShift(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		const int32 Shift = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		IGNORE_PERF_WARNING
+		ReturnValue = Value >> clamp(Shift, 0, 31);
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Round(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = (int)round(Value);
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_RoundToFloat(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = round(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SafeLerp(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		const float Alpha = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = lerp(A, B, clamp(Alpha, 0.f, 1.f));
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SeedToInt(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 Value = LoadInt32(Buffers[0], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = Value;
+		
+		StoreInt32(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Sin(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = sin(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SinDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = sin(PI / 180.f * Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SmoothMax(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothMax(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SmoothMin(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothMin(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SmoothStep(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		const float Alpha = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothStep(A, B, Alpha);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_SmoothSubtraction(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float DistanceA = LoadFloat(Buffers[0], Index);
+		const float DistanceB = LoadFloat(Buffers[1], Index);
+		const float Smoothness = LoadFloat(Buffers[2], Index);
+		float ReturnValue;
+		
+		ReturnValue = SmoothSubtraction(DistanceA, DistanceB, Smoothness);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Subtract(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float A = LoadFloat(Buffers[0], Index);
+		const float B = LoadFloat(Buffers[1], Index);
+		float ReturnValue;
+		
+		ReturnValue = A - B;
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Subtract_Int(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const int32 A = LoadInt32(Buffers[0], Index);
+		const int32 B = LoadInt32(Buffers[1], Index);
+		int32 ReturnValue;
+		
+		ReturnValue = A - B;
+		
+		StoreInt32(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Tan(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = tan(Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_TanDegrees(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float Value = LoadFloat(Buffers[0], Index);
+		float ReturnValue;
+		
+		ReturnValue = tan(PI / 180.f * Value);
+		
+		StoreFloat(Buffers[1], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_TrueDistanceCellularNoise2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Position = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float Jitter = LoadFloat(Buffers[2], Index);
+		const int32 Seed = LoadInt32(Buffers[3], Index);
+		float Value;
+		float2 CellPosition;
+		
+		Value = GetTrueDistanceCellularNoise2D(Seed, Position, Jitter, &CellPosition);
+		
+		StoreFloat(Buffers[4], Index, Value);
+		StoreFloat(Buffers[5], Index, CellPosition.x);
+		StoreFloat(Buffers[6], Index, CellPosition.y);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DCrossProduct(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 V1 = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float2 V2 = MakeFloat2(LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float ReturnValue;
+		
+		ReturnValue = V1.x * V2.y - V1.y * V2.x;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DDistance(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 V1 = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float2 V2 = MakeFloat2(LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float ReturnValue;
+		
+		ReturnValue = distance(V1, V2);
+		
+		StoreFloat(Buffers[4], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DDotProduct(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 V1 = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float2 V2 = MakeFloat2(LoadFloat(Buffers[2], Index), LoadFloat(Buffers[3], Index));
+		float ReturnValue;
+		
+		ReturnValue = V1.x * V2.x + V1.y * V2.y;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DLength(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Vector = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		float ReturnValue;
+		
+		ReturnValue = length(Vector);
+		
+		StoreFloat(Buffers[2], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DToColor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Vector2D = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float B = LoadFloat(Buffers[2], Index);
+		const float A = LoadFloat(Buffers[3], Index);
+		float4 ReturnValue;
+		
+		ReturnValue.x = Vector2D.x;
+		ReturnValue.y = Vector2D.y;
+		ReturnValue.z = B;
+		ReturnValue.w = A;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+		StoreFloat(Buffers[6], Index, ReturnValue.z);
+		StoreFloat(Buffers[7], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_Vector2DToVector(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float2 Vector2D = MakeFloat2(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index));
+		const float Z = LoadFloat(Buffers[2], Index);
+		float3 ReturnValue;
+		
+		ReturnValue.x = Vector2D.x;
+		ReturnValue.y = Vector2D.y;
+		ReturnValue.z = Z;
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+		StoreFloat(Buffers[5], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorCrossProduct(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 V1 = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float3 V2 = MakeFloat3(LoadFloat(Buffers[3], Index), LoadFloat(Buffers[4], Index), LoadFloat(Buffers[5], Index));
+		float3 ReturnValue;
+		
+		ReturnValue = cross(V1, V2);
+		
+		StoreFloat(Buffers[6], Index, ReturnValue.x);
+		StoreFloat(Buffers[7], Index, ReturnValue.y);
+		StoreFloat(Buffers[8], Index, ReturnValue.z);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorDistance(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 V1 = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float3 V2 = MakeFloat3(LoadFloat(Buffers[3], Index), LoadFloat(Buffers[4], Index), LoadFloat(Buffers[5], Index));
+		float ReturnValue;
+		
+		ReturnValue = distance(V1, V2);
+		
+		StoreFloat(Buffers[6], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorDistance2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 V1 = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float3 V2 = MakeFloat3(LoadFloat(Buffers[3], Index), LoadFloat(Buffers[4], Index), LoadFloat(Buffers[5], Index));
+		float ReturnValue;
+		
+		ReturnValue = distance(MakeFloat2(V1.x, V1.y), MakeFloat2(V2.x, V2.y));
+		
+		StoreFloat(Buffers[6], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorDotProduct(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 V1 = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float3 V2 = MakeFloat3(LoadFloat(Buffers[3], Index), LoadFloat(Buffers[4], Index), LoadFloat(Buffers[5], Index));
+		float ReturnValue;
+		
+		ReturnValue = V1.x * V2.x + V1.y * V2.y + V1.z * V2.z;
+		
+		StoreFloat(Buffers[6], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorLength(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float ReturnValue;
+		
+		ReturnValue = length(Vector);
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorLengthXY(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float ReturnValue;
+		
+		ReturnValue = length(MakeFloat2(Vector.x, Vector.y));
+		
+		StoreFloat(Buffers[3], Index, ReturnValue);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorToColor(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		const float A = LoadFloat(Buffers[3], Index);
+		float4 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		ReturnValue.z = Vector.z;
+		ReturnValue.w = A;
+		
+		StoreFloat(Buffers[4], Index, ReturnValue.x);
+		StoreFloat(Buffers[5], Index, ReturnValue.y);
+		StoreFloat(Buffers[6], Index, ReturnValue.z);
+		StoreFloat(Buffers[7], Index, ReturnValue.w);
+	}
+}
+
+FORCEINLINE void Execute_VoxelNode_VectorToVector2D(const FVoxelBuffer* uniform Buffers, const uniform int32 Num)
+{
+	FOREACH(Index, 0, Num)
+	{
+		const float3 Vector = MakeFloat3(LoadFloat(Buffers[0], Index), LoadFloat(Buffers[1], Index), LoadFloat(Buffers[2], Index));
+		float2 ReturnValue;
+		
+		ReturnValue.x = Vector.x;
+		ReturnValue.y = Vector.y;
+		
+		StoreFloat(Buffers[3], Index, ReturnValue.x);
+		StoreFloat(Buffers[4], Index, ReturnValue.y);
+	}
+}
+

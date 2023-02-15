@@ -1,0 +1,49 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+float3 Start;
+float Step;
+uint3 BlockSize;
+
+RWBuffer<float> OutPositionX;
+RWBuffer<float> OutPositionY;
+RWBuffer<float> OutPositionZ;
+
+[numthreads(4, 4, 4)]
+void Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	if (any(DispatchThreadId >= BlockSize))
+	{
+		return;
+	}
+
+	const uint BlockIndex = Get3DIndex(BlockSize, DispatchThreadId);
+
+	OutPositionX[8 * BlockIndex + 0] = Start.x + Step * (2 * DispatchThreadId.x + 0);
+	OutPositionX[8 * BlockIndex + 1] = Start.x + Step * (2 * DispatchThreadId.x + 1);
+	OutPositionX[8 * BlockIndex + 2] = Start.x + Step * (2 * DispatchThreadId.x + 0);
+	OutPositionX[8 * BlockIndex + 3] = Start.x + Step * (2 * DispatchThreadId.x + 1);
+	OutPositionX[8 * BlockIndex + 4] = Start.x + Step * (2 * DispatchThreadId.x + 0);
+	OutPositionX[8 * BlockIndex + 5] = Start.x + Step * (2 * DispatchThreadId.x + 1);
+	OutPositionX[8 * BlockIndex + 6] = Start.x + Step * (2 * DispatchThreadId.x + 0);
+	OutPositionX[8 * BlockIndex + 7] = Start.x + Step * (2 * DispatchThreadId.x + 1);
+
+	OutPositionY[8 * BlockIndex + 0] = Start.y + Step * (2 * DispatchThreadId.y + 0);
+	OutPositionY[8 * BlockIndex + 1] = Start.y + Step * (2 * DispatchThreadId.y + 0);
+	OutPositionY[8 * BlockIndex + 2] = Start.y + Step * (2 * DispatchThreadId.y + 1);
+	OutPositionY[8 * BlockIndex + 3] = Start.y + Step * (2 * DispatchThreadId.y + 1);
+	OutPositionY[8 * BlockIndex + 4] = Start.y + Step * (2 * DispatchThreadId.y + 0);
+	OutPositionY[8 * BlockIndex + 5] = Start.y + Step * (2 * DispatchThreadId.y + 0);
+	OutPositionY[8 * BlockIndex + 6] = Start.y + Step * (2 * DispatchThreadId.y + 1);
+	OutPositionY[8 * BlockIndex + 7] = Start.y + Step * (2 * DispatchThreadId.y + 1);
+
+	OutPositionZ[8 * BlockIndex + 0] = Start.z + Step * (2 * DispatchThreadId.z + 0);
+	OutPositionZ[8 * BlockIndex + 1] = Start.z + Step * (2 * DispatchThreadId.z + 0);
+	OutPositionZ[8 * BlockIndex + 2] = Start.z + Step * (2 * DispatchThreadId.z + 0);
+	OutPositionZ[8 * BlockIndex + 3] = Start.z + Step * (2 * DispatchThreadId.z + 0);
+	OutPositionZ[8 * BlockIndex + 4] = Start.z + Step * (2 * DispatchThreadId.z + 1);
+	OutPositionZ[8 * BlockIndex + 5] = Start.z + Step * (2 * DispatchThreadId.z + 1);
+	OutPositionZ[8 * BlockIndex + 6] = Start.z + Step * (2 * DispatchThreadId.z + 1);
+	OutPositionZ[8 * BlockIndex + 7] = Start.z + Step * (2 * DispatchThreadId.z + 1);
+}

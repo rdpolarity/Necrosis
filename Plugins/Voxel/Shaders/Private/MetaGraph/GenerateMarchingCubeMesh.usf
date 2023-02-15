@@ -1,0 +1,109 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint ChunkSize;
+uint DataSize;
+Buffer<float> Densities;
+
+RWBuffer<uint4> OutCells;
+RWBuffer<uint> OutIndices;
+RWBuffer<float> OutVerticesX;
+RWBuffer<float> OutVerticesY;
+RWBuffer<float> OutVerticesZ;
+
+RWBuffer<uint> Nums;
+
+Buffer<uint> RegularCellClass;
+Buffer<uint> RegularCellData;
+Buffer<uint> RegularVertexData;
+
+[numthreads(4, 4, 4)]
+void Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	if (any(DispatchThreadId >= ChunkSize))
+	{
+		return;
+	}
+
+	const uint3 CellPosition = DispatchThreadId;
+	const uint VoxelIndex = Get3DIndex(DataSize, CellPosition);
+
+	const uint CaseCode =
+		((Densities[VoxelIndex + 0 + 0 * DataSize + 0 * DataSize * DataSize] > 0) << 0) |
+		((Densities[VoxelIndex + 1 + 0 * DataSize + 0 * DataSize * DataSize] > 0) << 1) |
+		((Densities[VoxelIndex + 0 + 1 * DataSize + 0 * DataSize * DataSize] > 0) << 2) |
+		((Densities[VoxelIndex + 1 + 1 * DataSize + 0 * DataSize * DataSize] > 0) << 3) |
+		((Densities[VoxelIndex + 0 + 0 * DataSize + 1 * DataSize * DataSize] > 0) << 4) |
+		((Densities[VoxelIndex + 1 + 0 * DataSize + 1 * DataSize * DataSize] > 0) << 5) |
+		((Densities[VoxelIndex + 0 + 1 * DataSize + 1 * DataSize * DataSize] > 0) << 6) |
+		((Densities[VoxelIndex + 1 + 1 * DataSize + 1 * DataSize * DataSize] > 0) << 7);
+
+	BRANCH
+	if (CaseCode == 0 ||
+		CaseCode == 255)
+	{
+		return;
+	}
+
+	const uint CellClass = RegularCellClass[CaseCode];
+	const uint GeometryCounts = RegularCellData[16 * CellClass];
+	const uint NumVertices = GeometryCounts >> 4;
+	const uint NumTriangles = GeometryCounts & 0xF;
+	
+	uint CellIndex = 0;
+	InterlockedAdd(Nums[0], 1, CellIndex);
+	
+	uint BaseTriangleIndex = 0;
+	InterlockedAdd(Nums[1], 3 * NumTriangles, BaseTriangleIndex);
+	
+	uint BaseVertexIndex = 0;
+	InterlockedAdd(Nums[2], NumVertices, BaseVertexIndex);
+
+#if COMPUTE_NUMS
+	return;
+#endif
+
+	for (uint VertexIndex = 0; VertexIndex < NumVertices; VertexIndex++)
+	{
+		const uint EdgeCode = RegularVertexData[12 * CaseCode + VertexIndex];
+
+		const uint LocalIndexA = (EdgeCode >> 4) & 0x0F;
+		const uint LocalIndexB = EdgeCode & 0x0F;
+
+		const uint IndexA = VoxelIndex + bool(LocalIndexA & 0x1) + bool(LocalIndexA & 0x2) * DataSize + bool(LocalIndexA & 0x4) * DataSize * DataSize;
+		const uint IndexB = VoxelIndex + bool(LocalIndexB & 0x1) + bool(LocalIndexB & 0x2) * DataSize + bool(LocalIndexB & 0x4) * DataSize * DataSize;
+
+		const float ValueAtA = Densities[IndexA];
+		const float ValueAtB = Densities[IndexB];
+
+		const uint EdgeIndex = ((EdgeCode >> 8) & 0x0F);
+
+		const float Alpha = ValueAtA / (ValueAtA - ValueAtB);
+
+		float3 Position = float3(CellPosition + uint3(bool(LocalIndexA & 0x1), bool(LocalIndexA & 0x2), bool(LocalIndexA & 0x4)));
+
+		Position +=
+			EdgeIndex == 0
+			? float3(Alpha, 0, 0)
+			: EdgeIndex == 1
+			? float3(0, Alpha, 0)
+			: float3(0, 0, Alpha);
+
+		OutVerticesX[BaseVertexIndex + VertexIndex] = Position.x;
+		OutVerticesY[BaseVertexIndex + VertexIndex] = Position.y;
+		OutVerticesZ[BaseVertexIndex + VertexIndex] = Position.z;
+	}
+
+	uint4 Cell;
+	Cell.x = CellPosition.x;
+	Cell.y = CellPosition.y;
+	Cell.z = CellPosition.z;
+	Cell.w = ((BaseTriangleIndex / 3) << 8) | NumTriangles;
+	OutCells[CellIndex] = Cell;
+
+	for (uint TriangleIndex = 0; TriangleIndex < 3 * NumTriangles; TriangleIndex++)
+	{
+		OutIndices[BaseTriangleIndex + TriangleIndex] = BaseVertexIndex + RegularCellData[16 * CellClass + 1 + TriangleIndex];
+	}
+}

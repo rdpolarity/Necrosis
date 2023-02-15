@@ -1,0 +1,32 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+int TextureSize;
+int NumCells;
+int NumCellsPerSide;
+
+Buffer<uint2> Layer;
+
+RWTexture2D<uint> Texture;
+
+[numthreads(4, 4, 4)]
+void Main(uint3 DispatchThreadId : SV_DispatchThreadID)
+{
+	const int TextureX = DispatchThreadId.x;
+	const int TextureY = DispatchThreadId.y;
+	const int CellIndex = DispatchThreadId.z;
+
+	if (TextureX >= TextureSize ||
+		TextureY >= TextureSize ||
+		CellIndex >= NumCells)
+	{
+		return;
+	}
+	const int CellX = TextureSize * (CellIndex % NumCellsPerSide);
+	const int CellY = TextureSize * (CellIndex / NumCellsPerSide);
+	const int DataIndex = TextureX + TextureY * TextureSize + CellIndex * TextureSize * TextureSize;
+
+	const int2 TexCoord = int2(CellX + TextureX, CellY + TextureY);
+	Texture[TexCoord] = Layer[DataIndex].y;
+}

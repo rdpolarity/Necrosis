@@ -1,0 +1,20 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint Num;
+float Step;
+int Stride;
+Buffer<float> Values;
+RWBuffer<float> OutValues;
+
+[numthreads(64, 1, 1)]
+void Main(uint DispatchThreadId : SV_DispatchThreadID)
+{
+	if (DispatchThreadId >= Num)
+	{
+		return;
+	}
+
+	OutValues[DispatchThreadId] = (Values[DispatchThreadId + Stride] - Values[DispatchThreadId]) / Step;
+}

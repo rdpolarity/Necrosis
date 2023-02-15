@@ -1,0 +1,145 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint TextureSize;
+uint ChunkSize;
+float VoxelSize;
+uint NumCells;
+float3 PositionOffset;
+
+Buffer<uint4> SurfaceCells;
+Buffer<uint> SurfaceIndices;
+Buffer<float> SurfaceVerticesX;
+Buffer<float> SurfaceVerticesY;
+Buffer<float> SurfaceVerticesZ;
+
+RWBuffer<float> NormalsX;
+RWBuffer<float> NormalsY;
+RWBuffer<float> NormalsZ;
+RWBuffer<float> QueryPositionsX;
+RWBuffer<float> QueryPositionsY;
+RWBuffer<float> QueryPositionsZ;
+RWTexture2D<uint> IndirectionTexture;
+
+#define MaxTrianglesPerCell 5
+#define MaxVertices (MaxTrianglesPerCell * 3 * 2)
+#define NumThreads 64
+
+groupshared float3 Vertices[NumThreads * MaxVertices];
+
+[numthreads(NumThreads, 1, 1)]
+void Main(uint DispatchThreadId : SV_DispatchThreadID, uint GroupIndex : SV_GroupIndex)
+{
+	const uint CellIndex = DispatchThreadId;
+	if (CellIndex >= NumCells)
+	{
+		return;
+	}
+	
+	const uint4 Cell = SurfaceCells[CellIndex];
+	const uint3 CellPosition = uint3(Cell.x, Cell.y, Cell.z);
+	const uint NumTriangles = Cell.w & 0xFF;
+	const uint FirstTriangle = Cell.w >> 8;
+	const uint FirstVertex = MaxVertices * GroupIndex;
+
+	float3 Normal = 0;
+
+	UNROLL_N(MaxTrianglesPerCell)
+	for (uint TriangleIndex = 0; TriangleIndex < NumTriangles; TriangleIndex++)
+	{
+		const uint IndexA = SurfaceIndices[3 * (FirstTriangle + TriangleIndex) + 0];
+		const uint IndexB = SurfaceIndices[3 * (FirstTriangle + TriangleIndex) + 1];
+		const uint IndexC = SurfaceIndices[3 * (FirstTriangle + TriangleIndex) + 2];
+
+		const float3 PositionA = float3(SurfaceVerticesX[IndexA], SurfaceVerticesY[IndexA], SurfaceVerticesZ[IndexA]);
+		const float3 PositionB = float3(SurfaceVerticesX[IndexB], SurfaceVerticesY[IndexB], SurfaceVerticesZ[IndexB]);
+		const float3 PositionC = float3(SurfaceVerticesX[IndexC], SurfaceVerticesY[IndexC], SurfaceVerticesZ[IndexC]);
+
+		Normal += GetTriangleNormal(PositionA, PositionB, PositionC);
+
+		Vertices[FirstVertex + 3 * TriangleIndex + 0] = PositionA;
+		Vertices[FirstVertex + 3 * TriangleIndex + 1] = PositionB;
+		Vertices[FirstVertex + 3 * TriangleIndex + 2] = PositionC;
+
+		// Add bigger triangles to ensure all rays hit
+		const float3 Centroid = (PositionA + PositionB + PositionC) / 3.f;
+		Vertices[FirstVertex + 3 * (NumTriangles + TriangleIndex) + 0] = Centroid + 10 * normalize(PositionA - Centroid);
+		Vertices[FirstVertex + 3 * (NumTriangles + TriangleIndex) + 1] = Centroid + 10 * normalize(PositionB - Centroid);
+		Vertices[FirstVertex + 3 * (NumTriangles + TriangleIndex) + 2] = Centroid + 10 * normalize(PositionC - Centroid);
+	}
+	Normal = normalize(Normal);
+
+	NormalsX[CellIndex] = Normal.x;
+	NormalsY[CellIndex] = Normal.y;
+	NormalsZ[CellIndex] = Normal.z;
+	
+	const float3 Abs = abs(Normal);
+	const uint Direction =
+		(Abs.x >= Abs.y && Abs.x >= Abs.z)
+		? 0
+		: (Abs.y >= Abs.x && Abs.y >= Abs.z)
+		? 1
+		: 2;
+
+	// Write indirection
+	IndirectionTexture[int2(CellPosition.x, CellPosition.y + ChunkSize * CellPosition.z)] = CellIndex | (Direction << 14);
+
+	const float3 RayDirection =
+		Direction == 0
+		? float3(1, 0, 0)
+		: Direction == 1
+		? float3(0, 1, 0)
+		: float3(0, 0, 1);
+
+	for (uint Y = 0; Y < TextureSize; Y++)
+	{
+		for (uint X = 0; X < TextureSize; X++)
+		{
+			float3 Offset =
+				Direction == 0
+				? float3(0, X, Y)
+				: Direction == 1
+				? float3(X, 0, Y)
+				: float3(X, Y, 0);
+
+			Offset = (Offset * (TextureSize + 1) / TextureSize - 0.5f);
+			// Offset[Direction] = 0
+			Offset *= 1.f - RayDirection;
+
+			const float3 RayOrigin = float3(CellPosition) + Offset / TextureSize;
+
+			float3 HitPosition = 1e50;
+			
+			UNROLL_N(2 * MaxTrianglesPerCell)
+			for (uint TriangleIndex = 0; TriangleIndex < 2 * NumTriangles; TriangleIndex++)
+			{
+				float Time;
+				float3 Barycentrics;
+				if (!RayTriangleIntersection(
+					RayOrigin,
+					RayDirection,
+					Vertices[FirstVertex + 3 * TriangleIndex + 0],
+					Vertices[FirstVertex + 3 * TriangleIndex + 1],
+					Vertices[FirstVertex + 3 * TriangleIndex + 2],
+					true,
+					Time,
+					Barycentrics))
+				{
+					continue;
+				}
+
+				HitPosition = RayOrigin + Time * RayDirection;
+				break;
+			}
+
+			HitPosition *= VoxelSize;
+			HitPosition += PositionOffset;
+
+			const uint Index = X + Y * TextureSize + CellIndex * TextureSize * TextureSize;
+			QueryPositionsX[Index] = HitPosition.x;
+			QueryPositionsY[Index] = HitPosition.y;
+			QueryPositionsZ[Index] = HitPosition.z;
+		}
+	}
+}

@@ -1,0 +1,1464 @@
+#if NODE_ID == 0 // FVoxelNode_Abs
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = abs(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 1 // FVoxelNode_Abs_Int
+const int Value = LoadInt32(0);
+int ReturnValue;
+
+ReturnValue = abs(Value);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 2 // FVoxelNode_Acos
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = acos(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 3 // FVoxelNode_AcosDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = 180.f / PI * acos(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 4 // FVoxelNode_Add
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = A + B;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 5 // FVoxelNode_Add_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A + B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 6 // FVoxelNode_Asin
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = asin(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 7 // FVoxelNode_AsinDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = 180.f / PI * asin(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 8 // FVoxelNode_Atan
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = atan(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 9 // FVoxelNode_Atan2
+const float Y = LoadFloat(0);
+const float X = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = atan2(Y, X);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 10 // FVoxelNode_Atan2Degrees
+const float Y = LoadFloat(0);
+const float X = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = 180.f / PI * atan2(Y, X);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 11 // FVoxelNode_AtanDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = 180.f / PI * atan(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 12 // FVoxelNode_BilinearInterpolation
+const float2 Position = float2(LoadFloat(0), LoadFloat(1));
+const float X0Y0 = LoadFloat(2);
+const float X1Y0 = LoadFloat(3);
+const float X0Y1 = LoadFloat(4);
+const float X1Y1 = LoadFloat(5);
+float ReturnValue;
+
+ReturnValue = BilinearInterpolation(X0Y0, X1Y0, X0Y1, X1Y1, Position.x, Position.y);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 13 // FVoxelNode_Bitwise_And
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A & B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 14 // FVoxelNode_Bitwise_Not
+const int A = LoadInt32(0);
+int ReturnValue;
+
+ReturnValue = ~A;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 15 // FVoxelNode_Bitwise_Or
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A | B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 16 // FVoxelNode_Bitwise_Xor
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A ^ B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 17 // FVoxelNode_BooleanAND
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = A && B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 18 // FVoxelNode_BooleanNAND
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = !(A && B);
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 19 // FVoxelNode_BooleanNOR
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = !(A || B);
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 20 // FVoxelNode_BooleanNOT
+const bool A = LoadByte(0);
+bool ReturnValue;
+
+ReturnValue = !A;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 21 // FVoxelNode_BooleanOR
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = A || B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 22 // FVoxelNode_BooleanXOR
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = A != B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 23 // FVoxelNode_BreakIntPoint
+const int2 Vector = int2(LoadInt32(0), LoadInt32(1));
+int X;
+int Y;
+
+X = Vector.x;
+Y = Vector.y;
+
+StoreInt32(0, X);
+StoreInt32(1, Y);
+#endif
+
+#if NODE_ID == 24 // FVoxelNode_BreakIntVector
+const int3 Vector = int3(LoadInt32(0), LoadInt32(1), LoadInt32(2));
+int X;
+int Y;
+int Z;
+
+X = Vector.x;
+Y = Vector.y;
+Z = Vector.z;
+
+StoreInt32(0, X);
+StoreInt32(1, Y);
+StoreInt32(2, Z);
+#endif
+
+#if NODE_ID == 25 // FVoxelNode_BreakLinearColor
+const float4 Color = float4(LoadFloat(0), LoadFloat(1), LoadFloat(2), LoadFloat(3));
+float R;
+float G;
+float B;
+float A;
+
+R = Color.x;
+G = Color.y;
+B = Color.z;
+A = Color.w;
+
+StoreFloat(0, R);
+StoreFloat(1, G);
+StoreFloat(2, B);
+StoreFloat(3, A);
+#endif
+
+#if NODE_ID == 26 // FVoxelNode_BreakQuaternion
+const float4 Quaternion = float4(LoadFloat(0), LoadFloat(1), LoadFloat(2), LoadFloat(3));
+float X;
+float Y;
+float Z;
+float W;
+
+X = Quaternion.x;
+Y = Quaternion.y;
+Z = Quaternion.z;
+W = Quaternion.w;
+
+StoreFloat(0, X);
+StoreFloat(1, Y);
+StoreFloat(2, Z);
+StoreFloat(3, W);
+#endif
+
+#if NODE_ID == 27 // FVoxelNode_BreakVector
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float X;
+float Y;
+float Z;
+
+X = Vector.x;
+Y = Vector.y;
+Z = Vector.z;
+
+StoreFloat(0, X);
+StoreFloat(1, Y);
+StoreFloat(2, Z);
+#endif
+
+#if NODE_ID == 28 // FVoxelNode_BreakVector2D
+const float2 Vector = float2(LoadFloat(0), LoadFloat(1));
+float X;
+float Y;
+
+X = Vector.x;
+Y = Vector.y;
+
+StoreFloat(0, X);
+StoreFloat(1, Y);
+#endif
+
+#if NODE_ID == 29 // FVoxelNode_Ceil
+const float Value = LoadFloat(0);
+int ReturnValue;
+
+ReturnValue = (int)ceil(Value);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 30 // FVoxelNode_CeilToFloat
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = ceil(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 31 // FVoxelNode_CellularNoise2D
+const float2 Position = float2(LoadFloat(0), LoadFloat(1));
+const float Jitter = LoadFloat(2);
+const int Seed = LoadInt32(0);
+float Value;
+
+Value = GetCellularNoise2D(Seed, Position, Jitter);
+
+StoreFloat(0, Value);
+#endif
+
+#if NODE_ID == 32 // FVoxelNode_CellularNoise3D
+const float3 Position = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float Jitter = LoadFloat(3);
+const int Seed = LoadInt32(0);
+float Value;
+
+Value = GetCellularNoise3D(Seed, Position, Jitter);
+
+StoreFloat(0, Value);
+#endif
+
+#if NODE_ID == 33 // FVoxelNode_Clamp
+const float Value = LoadFloat(0);
+const float Min = LoadFloat(1);
+const float Max = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = clamp(Value, Min, Max);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 34 // FVoxelNode_Clamp_Int
+const int Value = LoadInt32(0);
+const int Min = LoadInt32(1);
+const int Max = LoadInt32(2);
+int ReturnValue;
+
+ReturnValue = clamp(Value, Min, Max);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 35 // FVoxelNode_ColorToVector
+const float4 Color = float4(LoadFloat(0), LoadFloat(1), LoadFloat(2), LoadFloat(3));
+float3 ReturnValue;
+
+ReturnValue.x = Color.x;
+ReturnValue.y = Color.y;
+ReturnValue.z = Color.z;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 36 // FVoxelNode_ColorToVector2D
+const float4 Color = float4(LoadFloat(0), LoadFloat(1), LoadFloat(2), LoadFloat(3));
+float2 ReturnValue;
+
+ReturnValue.x = Color.x;
+ReturnValue.y = Color.y;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 37 // FVoxelNode_Conv_IntPointToVector2D
+const int2 Vector = int2(LoadInt32(0), LoadInt32(1));
+float2 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 38 // FVoxelNode_Conv_IntToFloat
+const int Value = LoadInt32(0);
+float ReturnValue;
+
+ReturnValue = (float)Value;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 39 // FVoxelNode_Conv_IntVectorToVector
+const int3 Vector = int3(LoadInt32(0), LoadInt32(1), LoadInt32(2));
+float3 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+ReturnValue.z = Vector.z;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 40 // FVoxelNode_Conv_IntVectorToVector2D
+const int3 Vector = int3(LoadInt32(0), LoadInt32(1), LoadInt32(2));
+float2 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 41 // FVoxelNode_Cos
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = cos(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 42 // FVoxelNode_CosDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = cos(PI / 180.f * Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 43 // FVoxelNode_DegreesToRadians
+const float A = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = A * (PI / 180.f);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 44 // FVoxelNode_Density_Invert
+const float Density = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = -Density;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 45 // FVoxelNode_Density_SmoothIntersection
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothMax(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 46 // FVoxelNode_Density_SmoothSubtraction
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothSubtraction(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 47 // FVoxelNode_Density_SmoothUnion
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothMin(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 48 // FVoxelNode_DensityToFloat
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = Value;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 49 // FVoxelNode_Divide
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = A / B;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 50 // FVoxelNode_Divide_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = B != 0 ? A / B : 0;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 51 // FVoxelNode_EqualEqual
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A == B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 52 // FVoxelNode_EqualEqual_BoolBool
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = A == B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 53 // FVoxelNode_EqualEqual_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A == B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 54 // FVoxelNode_FloatToColor
+const float Value = LoadFloat(0);
+float4 ReturnValue;
+
+ReturnValue.x = Value;
+ReturnValue.y = Value;
+ReturnValue.z = Value;
+ReturnValue.w = Value;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 55 // FVoxelNode_FloatToDensity
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = Value;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 56 // FVoxelNode_FloatToVector
+const float Value = LoadFloat(0);
+float3 ReturnValue;
+
+ReturnValue.x = Value;
+ReturnValue.y = Value;
+ReturnValue.z = Value;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 57 // FVoxelNode_FloatToVector2D
+const float Value = LoadFloat(0);
+float2 ReturnValue;
+
+ReturnValue.x = Value;
+ReturnValue.y = Value;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 58 // FVoxelNode_Floor
+const float Value = LoadFloat(0);
+int ReturnValue;
+
+ReturnValue = (int)floor(Value);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 59 // FVoxelNode_FloorToFloat
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = floor(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 60 // FVoxelNode_Frac
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = Value - floor(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 61 // FVoxelNode_GetPI
+float ReturnValue;
+
+ReturnValue = PI;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 62 // FVoxelNode_Greater
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A > B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 63 // FVoxelNode_Greater_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A > B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 64 // FVoxelNode_GreaterEqual
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A >= B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 65 // FVoxelNode_GreaterEqual_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A >= B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 66 // FVoxelNode_Int32ToIntPoint
+const int Value = LoadInt32(0);
+int2 ReturnValue;
+
+ReturnValue.x = Value;
+ReturnValue.y = Value;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 67 // FVoxelNode_Int32ToIntVector
+const int Value = LoadInt32(0);
+int3 ReturnValue;
+
+ReturnValue.x = Value;
+ReturnValue.y = Value;
+ReturnValue.z = Value;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+StoreInt32(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 68 // FVoxelNode_IntPointToIntVector
+const int2 Vector2D = int2(LoadInt32(0), LoadInt32(1));
+const int Z = LoadInt32(2);
+int3 ReturnValue;
+
+ReturnValue.x = Vector2D.x;
+ReturnValue.y = Vector2D.y;
+ReturnValue.z = Z;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+StoreInt32(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 69 // FVoxelNode_IntToSeed
+const int Value = LoadInt32(0);
+int ReturnValue;
+
+ReturnValue = Value;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 70 // FVoxelNode_IntVectorToIntPoint
+const int3 Vector = int3(LoadInt32(0), LoadInt32(1), LoadInt32(2));
+int2 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 71 // FVoxelNode_LeftShift
+const int Value = LoadInt32(0);
+const int Shift = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = Value << clamp(Shift, 0, 31);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 72 // FVoxelNode_Lerp
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+const float Alpha = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = lerp(A, B, Alpha);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 73 // FVoxelNode_Less
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A < B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 74 // FVoxelNode_Less_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A < B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 75 // FVoxelNode_LessEqual
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A <= B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 76 // FVoxelNode_LessEqual_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A <= B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 77 // FVoxelNode_MakeDensityFromHeight
+const float3 Position = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float Height = LoadFloat(3);
+float ReturnValue;
+
+ReturnValue = Position.z - Height;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 78 // FVoxelNode_MakeIntPoint
+const int X = LoadInt32(0);
+const int Y = LoadInt32(1);
+int2 ReturnValue;
+
+ReturnValue.x = X;
+ReturnValue.y = Y;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 79 // FVoxelNode_MakeIntVector
+const int X = LoadInt32(0);
+const int Y = LoadInt32(1);
+const int Z = LoadInt32(2);
+int3 ReturnValue;
+
+ReturnValue.x = X;
+ReturnValue.y = Y;
+ReturnValue.z = Z;
+
+StoreInt32(0, ReturnValue.x);
+StoreInt32(1, ReturnValue.y);
+StoreInt32(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 80 // FVoxelNode_MakeLinearColor
+const float R = LoadFloat(0);
+const float G = LoadFloat(1);
+const float B = LoadFloat(2);
+const float A = LoadFloat(3);
+float4 ReturnValue;
+
+ReturnValue.x = R;
+ReturnValue.y = G;
+ReturnValue.z = B;
+ReturnValue.w = A;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 81 // FVoxelNode_MakeQuaternion
+const float X = LoadFloat(0);
+const float Y = LoadFloat(1);
+const float Z = LoadFloat(2);
+const float W = LoadFloat(3);
+float4 ReturnValue;
+
+ReturnValue.x = X;
+ReturnValue.y = Y;
+ReturnValue.z = Z;
+ReturnValue.w = W;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 82 // FVoxelNode_MakeRotationFromEuler
+const float Roll = LoadFloat(0);
+const float Pitch = LoadFloat(1);
+const float Yaw = LoadFloat(2);
+float4 ReturnValue;
+
+ReturnValue = MakeQuaternionFromEuler(Pitch, Yaw, Roll);
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 83 // FVoxelNode_MakeRotationFromZ
+const float3 Z = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float4 ReturnValue;
+
+ReturnValue = MakeQuaternionFromZ(Z);
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 84 // FVoxelNode_MakeVector
+const float X = LoadFloat(0);
+const float Y = LoadFloat(1);
+const float Z = LoadFloat(2);
+float3 ReturnValue;
+
+ReturnValue.x = X;
+ReturnValue.y = Y;
+ReturnValue.z = Z;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 85 // FVoxelNode_MakeVector2D
+const float X = LoadFloat(0);
+const float Y = LoadFloat(1);
+float2 ReturnValue;
+
+ReturnValue.x = X;
+ReturnValue.y = Y;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 86 // FVoxelNode_MappedRangeValueClamped
+const float Value = LoadFloat(0);
+const float InMin = LoadFloat(1);
+const float InMax = LoadFloat(2);
+const float OutMin = LoadFloat(3);
+const float OutMax = LoadFloat(4);
+float ReturnValue;
+
+ReturnValue = lerp(OutMin, OutMax, clamp((Value - InMin) / (InMax - InMin), 0.f, 1.f));
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 87 // FVoxelNode_MappedRangeValueUnclamped
+const float Value = LoadFloat(0);
+const float InMin = LoadFloat(1);
+const float InMax = LoadFloat(2);
+const float OutMin = LoadFloat(3);
+const float OutMax = LoadFloat(4);
+float ReturnValue;
+
+ReturnValue = lerp(OutMin, OutMax, (Value - InMin) / (InMax - InMin));
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 88 // FVoxelNode_Max
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = max(A, B);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 89 // FVoxelNode_Max_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = max(A, B);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 90 // FVoxelNode_Min
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = min(A, B);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 91 // FVoxelNode_Min_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = min(A, B);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 92 // FVoxelNode_MixSeeds
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = MurmurHash32(MurmurHash32(A) ^ B);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 93 // FVoxelNode_Multiply
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = A * B;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 94 // FVoxelNode_Multiply_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A * B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 95 // FVoxelNode_NearlyEqual
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+const float ErrorTolerance = LoadFloat(2);
+bool ReturnValue;
+
+ReturnValue = abs(A - B) <= ErrorTolerance;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 96 // FVoxelNode_NormalizeVector
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float3 ReturnValue;
+
+ReturnValue = normalize(Vector);
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 97 // FVoxelNode_NormalizeVector2D
+const float2 Vector = float2(LoadFloat(0), LoadFloat(1));
+float2 ReturnValue;
+
+ReturnValue = normalize(Vector);
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+
+#if NODE_ID == 98 // FVoxelNode_NotEqual
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+bool ReturnValue;
+
+ReturnValue = A != B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 99 // FVoxelNode_NotEqual_BoolBool
+const bool A = LoadByte(0);
+const bool B = LoadByte(1);
+bool ReturnValue;
+
+ReturnValue = A != B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 100 // FVoxelNode_NotEqual_IntInt
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+bool ReturnValue;
+
+ReturnValue = A != B;
+
+StoreByte(0, ReturnValue);
+#endif
+
+#if NODE_ID == 101 // FVoxelNode_OneMinus
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = 1 - Value;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 102 // FVoxelNode_PerlinNoise2D
+const float2 Position = float2(LoadFloat(0), LoadFloat(1));
+const int Seed = LoadInt32(0);
+float Value;
+
+Value = GetPerlin2D(Seed, Position);
+
+StoreFloat(0, Value);
+#endif
+
+#if NODE_ID == 103 // FVoxelNode_PerlinNoise3D
+const float3 Position = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const int Seed = LoadInt32(0);
+float Value;
+
+Value = GetPerlin3D(Seed, Position);
+
+StoreFloat(0, Value);
+#endif
+
+#if NODE_ID == 104 // FVoxelNode_Power
+const float Base = LoadFloat(0);
+const float Exp = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = pow(abs(Base), Exp);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 105 // FVoxelNode_RadiansToDegrees
+const float A = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = A * (180.f / PI);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 106 // FVoxelNode_RightShift
+const int Value = LoadInt32(0);
+const int Shift = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = Value >> clamp(Shift, 0, 31);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 107 // FVoxelNode_Round
+const float Value = LoadFloat(0);
+int ReturnValue;
+
+ReturnValue = (int)round(Value);
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 108 // FVoxelNode_RoundToFloat
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = round(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 109 // FVoxelNode_SafeLerp
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+const float Alpha = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = lerp(A, B, clamp(Alpha, 0.f, 1.f));
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 110 // FVoxelNode_SeedToInt
+const int Value = LoadInt32(0);
+int ReturnValue;
+
+ReturnValue = Value;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 111 // FVoxelNode_Sin
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = sin(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 112 // FVoxelNode_SinDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = sin(PI / 180.f * Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 113 // FVoxelNode_SmoothMax
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothMax(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 114 // FVoxelNode_SmoothMin
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothMin(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 115 // FVoxelNode_SmoothStep
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+const float Alpha = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothStep(A, B, Alpha);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 116 // FVoxelNode_SmoothSubtraction
+const float DistanceA = LoadFloat(0);
+const float DistanceB = LoadFloat(1);
+const float Smoothness = LoadFloat(2);
+float ReturnValue;
+
+ReturnValue = SmoothSubtraction(DistanceA, DistanceB, Smoothness);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 117 // FVoxelNode_Subtract
+const float A = LoadFloat(0);
+const float B = LoadFloat(1);
+float ReturnValue;
+
+ReturnValue = A - B;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 118 // FVoxelNode_Subtract_Int
+const int A = LoadInt32(0);
+const int B = LoadInt32(1);
+int ReturnValue;
+
+ReturnValue = A - B;
+
+StoreInt32(0, ReturnValue);
+#endif
+
+#if NODE_ID == 119 // FVoxelNode_Tan
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = tan(Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 120 // FVoxelNode_TanDegrees
+const float Value = LoadFloat(0);
+float ReturnValue;
+
+ReturnValue = tan(PI / 180.f * Value);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 121 // FVoxelNode_TrueDistanceCellularNoise2D
+const float2 Position = float2(LoadFloat(0), LoadFloat(1));
+const float Jitter = LoadFloat(2);
+const int Seed = LoadInt32(0);
+float Value;
+float2 CellPosition;
+
+Value = GetTrueDistanceCellularNoise2D(Seed, Position, Jitter, CellPosition);
+
+StoreFloat(0, Value);
+StoreFloat(1, CellPosition.x);
+StoreFloat(2, CellPosition.y);
+#endif
+
+#if NODE_ID == 122 // FVoxelNode_Vector2DCrossProduct
+const float2 V1 = float2(LoadFloat(0), LoadFloat(1));
+const float2 V2 = float2(LoadFloat(2), LoadFloat(3));
+float ReturnValue;
+
+ReturnValue = V1.x * V2.y - V1.y * V2.x;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 123 // FVoxelNode_Vector2DDistance
+const float2 V1 = float2(LoadFloat(0), LoadFloat(1));
+const float2 V2 = float2(LoadFloat(2), LoadFloat(3));
+float ReturnValue;
+
+ReturnValue = distance(V1, V2);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 124 // FVoxelNode_Vector2DDotProduct
+const float2 V1 = float2(LoadFloat(0), LoadFloat(1));
+const float2 V2 = float2(LoadFloat(2), LoadFloat(3));
+float ReturnValue;
+
+ReturnValue = V1.x * V2.x + V1.y * V2.y;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 125 // FVoxelNode_Vector2DLength
+const float2 Vector = float2(LoadFloat(0), LoadFloat(1));
+float ReturnValue;
+
+ReturnValue = length(Vector);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 126 // FVoxelNode_Vector2DToColor
+const float2 Vector2D = float2(LoadFloat(0), LoadFloat(1));
+const float B = LoadFloat(2);
+const float A = LoadFloat(3);
+float4 ReturnValue;
+
+ReturnValue.x = Vector2D.x;
+ReturnValue.y = Vector2D.y;
+ReturnValue.z = B;
+ReturnValue.w = A;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 127 // FVoxelNode_Vector2DToVector
+const float2 Vector2D = float2(LoadFloat(0), LoadFloat(1));
+const float Z = LoadFloat(2);
+float3 ReturnValue;
+
+ReturnValue.x = Vector2D.x;
+ReturnValue.y = Vector2D.y;
+ReturnValue.z = Z;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 128 // FVoxelNode_VectorCrossProduct
+const float3 V1 = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float3 V2 = float3(LoadFloat(3), LoadFloat(4), LoadFloat(5));
+float3 ReturnValue;
+
+ReturnValue = cross(V1, V2);
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+#endif
+
+#if NODE_ID == 129 // FVoxelNode_VectorDistance
+const float3 V1 = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float3 V2 = float3(LoadFloat(3), LoadFloat(4), LoadFloat(5));
+float ReturnValue;
+
+ReturnValue = distance(V1, V2);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 130 // FVoxelNode_VectorDistance2D
+const float3 V1 = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float3 V2 = float3(LoadFloat(3), LoadFloat(4), LoadFloat(5));
+float ReturnValue;
+
+ReturnValue = distance(MakeFloat2(V1.x, V1.y), MakeFloat2(V2.x, V2.y));
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 131 // FVoxelNode_VectorDotProduct
+const float3 V1 = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float3 V2 = float3(LoadFloat(3), LoadFloat(4), LoadFloat(5));
+float ReturnValue;
+
+ReturnValue = V1.x * V2.x + V1.y * V2.y + V1.z * V2.z;
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 132 // FVoxelNode_VectorLength
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float ReturnValue;
+
+ReturnValue = length(Vector);
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 133 // FVoxelNode_VectorLengthXY
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float ReturnValue;
+
+ReturnValue = length(MakeFloat2(Vector.x, Vector.y));
+
+StoreFloat(0, ReturnValue);
+#endif
+
+#if NODE_ID == 134 // FVoxelNode_VectorToColor
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+const float A = LoadFloat(3);
+float4 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+ReturnValue.z = Vector.z;
+ReturnValue.w = A;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+StoreFloat(2, ReturnValue.z);
+StoreFloat(3, ReturnValue.w);
+#endif
+
+#if NODE_ID == 135 // FVoxelNode_VectorToVector2D
+const float3 Vector = float3(LoadFloat(0), LoadFloat(1), LoadFloat(2));
+float2 ReturnValue;
+
+ReturnValue.x = Vector.x;
+ReturnValue.y = Vector.y;
+
+StoreFloat(0, ReturnValue.x);
+StoreFloat(1, ReturnValue.y);
+#endif
+

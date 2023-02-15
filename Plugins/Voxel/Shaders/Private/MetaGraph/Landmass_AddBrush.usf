@@ -1,0 +1,155 @@
+﻿// Copyright Voxel Plugin, Inc. All Rights Reserved.
+
+#include "Common.ush"
+
+uint Num;
+int3 BrushSize;
+float4x4 LocalToData;
+float DataToLocalScale;
+float DistanceOffset;
+uint bSubtractive;
+float LayerSmoothness;
+
+Buffer<float> DistanceField;
+Buffer<float2> Normals;
+
+Buffer<float> PositionsX;
+Buffer<float> PositionsY;
+Buffer<float> PositionsZ;
+
+RWBuffer<float> DistanceData;
+
+[numthreads(64, 1, 1)]
+void Main(uint DispatchThreadId : SV_DispatchThreadID)
+{
+	const uint Index = DispatchThreadId;
+	if (Index >= Num)
+	{
+		return;
+	}
+
+	const float3 FullFloatPosition = TransformPosition(float3(PositionsX[Index], PositionsY[Index], PositionsZ[Index]), LocalToData);
+	const float3 ClampedFloatPosition = clamp(FullFloatPosition, 0.f, float3(BrushSize) - 1.f - 0.0001f);
+	const float3 Position = floor(ClampedFloatPosition);
+	const float3 Alpha = ClampedFloatPosition - Position;
+
+	const int X = Position.x;
+	const int Y = Position.y;
+	const int Z = Position.z;
+
+	const float Distance000 = DistanceField[(X + 0) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 0)];
+	const float Distance001 = DistanceField[(X + 1) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 0)];
+	const float Distance010 = DistanceField[(X + 0) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 0)];
+	const float Distance011 = DistanceField[(X + 1) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 0)];
+	const float Distance100 = DistanceField[(X + 0) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 1)];
+	const float Distance101 = DistanceField[(X + 1) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 1)];
+	const float Distance110 = DistanceField[(X + 0) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 1)];
+	const float Distance111 = DistanceField[(X + 1) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 1)];
+
+	float BrushDistance;
+
+#if HERMITE_INTERPOLATION
+	const float3 Normal000 = OctahedronToUnitVector(Normals[(X + 0) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 0)] * 2.f - 1.f);
+	const float3 Normal001 = OctahedronToUnitVector(Normals[(X + 1) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 0)] * 2.f - 1.f);
+	const float3 Normal010 = OctahedronToUnitVector(Normals[(X + 0) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 0)] * 2.f - 1.f);
+	const float3 Normal011 = OctahedronToUnitVector(Normals[(X + 1) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 0)] * 2.f - 1.f);
+	const float3 Normal100 = OctahedronToUnitVector(Normals[(X + 0) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 1)] * 2.f - 1.f);
+	const float3 Normal101 = OctahedronToUnitVector(Normals[(X + 1) + BrushSize.x * (Y + 0) + BrushSize.x * BrushSize.y * (Z + 1)] * 2.f - 1.f);
+	const float3 Normal110 = OctahedronToUnitVector(Normals[(X + 0) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 1)] * 2.f - 1.f);
+	const float3 Normal111 = OctahedronToUnitVector(Normals[(X + 1) + BrushSize.x * (Y + 1) + BrushSize.x * BrushSize.y * (Z + 1)] * 2.f - 1.f);
+
+	const float P0X = HermiteP0(Alpha.x);
+	const float P0Y = HermiteP0(Alpha.y);
+	const float P0Z = HermiteP0(Alpha.z);
+
+	const float P1X = HermiteP1(Alpha.x);
+	const float P1Y = HermiteP1(Alpha.y);
+	const float P1Z = HermiteP1(Alpha.z);
+
+	const float D0X = HermiteD0(Alpha.x);
+	const float D0Y = HermiteD0(Alpha.y);
+	const float D0Z = HermiteD0(Alpha.z);
+
+	const float D1X = HermiteD1(Alpha.x);
+	const float D1Y = HermiteD1(Alpha.y);
+	const float D1Z = HermiteD1(Alpha.z);
+
+	BrushDistance =
+		Distance000 * P0X * P0Y * P0Z +
+		Normal000.x * D0X * P0Y * P0Z +
+		Normal000.y * P0X * D0Y * P0Z +
+		Normal000.z * P0X * P0Y * D0Z +
+
+		Distance001 * P1X * P0Y * P0Z +
+		Normal001.x * D1X * P0Y * P0Z +
+		Normal001.y * P1X * D0Y * P0Z +
+		Normal001.z * P1X * P0Y * D0Z +
+
+		Distance010 * P0X * P1Y * P0Z +
+		Normal010.x * D0X * P1Y * P0Z +
+		Normal010.y * P0X * D1Y * P0Z +
+		Normal010.z * P0X * P1Y * D0Z +
+
+		Distance011 * P1X * P1Y * P0Z +
+		Normal011.x * D1X * P1Y * P0Z +
+		Normal011.y * P1X * D1Y * P0Z +
+		Normal011.z * P1X * P1Y * D0Z +
+
+		Distance100 * P0X * P0Y * P1Z +
+		Normal100.x * D0X * P0Y * P1Z +
+		Normal100.y * P0X * D0Y * P1Z +
+		Normal100.z * P0X * P0Y * D1Z +
+
+		Distance101 * P1X * P0Y * P1Z +
+		Normal101.x * D1X * P0Y * P1Z +
+		Normal101.y * P1X * D0Y * P1Z +
+		Normal101.z * P1X * P0Y * D1Z +
+
+		Distance110 * P0X * P1Y * P1Z +
+		Normal110.x * D0X * P1Y * P1Z +
+		Normal110.y * P0X * D1Y * P1Z +
+		Normal110.z * P0X * P1Y * D1Z +
+
+		Distance111 * P1X * P1Y * P1Z +
+		Normal111.x * D1X * P1Y * P1Z +
+		Normal111.y * P1X * D1Y * P1Z +
+		Normal111.z * P1X * P1Y * D1Z;
+#else
+	BrushDistance = TrilinearInterpolation(
+		Distance000,
+		Distance001,
+		Distance010,
+		Distance011,
+		Distance100,
+		Distance101,
+		Distance110,
+		Distance111,
+		Alpha.x,
+		Alpha.y,
+		Alpha.z);
+#endif
+
+	BrushDistance += distance(FullFloatPosition, ClampedFloatPosition);
+
+	// Put the distance in voxels
+	BrushDistance *= DataToLocalScale;
+	BrushDistance -= DistanceOffset;
+
+	if (bSubtractive)
+	{
+		BrushDistance = -BrushDistance;
+	}
+
+#if FIRST_BRUSH
+	DistanceData[Index] = BrushDistance;
+#else
+	if (bSubtractive)
+	{
+		DistanceData[Index] = SmoothSubtraction(DistanceData[Index], BrushDistance, LayerSmoothness);
+	}
+	else
+	{
+		DistanceData[Index] = SmoothMin(DistanceData[Index], BrushDistance, LayerSmoothness);
+	}
+#endif
+}
