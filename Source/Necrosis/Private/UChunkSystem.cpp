@@ -43,10 +43,14 @@ void AUChunkSystem::SpawnChunksAround(FVector Point)
 				if (SpawnedChunks[ChunkPositionToSpawn]->ChunkState == EChunkState::DE_SPAWNED)
 				{
 					SpawnedChunks[ChunkPositionToSpawn]->ChunkState = EChunkState::SPAWNED;
-				} else continue;
+				};
+				continue;
 			}
+
+			// Spawn a new chunk
 			UChunk* NewChunk = NewObject<UChunk>();
 			SpawnedChunks.Add(ChunkPositionToSpawn, NewChunk);
+			GenerateScatterObjectsAround(ChunkPositionToSpawn);
 		}
 	}
 }
@@ -62,6 +66,38 @@ void AUChunkSystem::DespawnChunksAround(FVector Point)
 		{
 			ChunkObject->ChunkState = EChunkState::DE_SPAWNED;
 		}
+	}
+}
+
+void AUChunkSystem::GenerateScatterObjectsAround(FVector Chunk)
+{
+	for (TSubclassOf<UScatterTemplate> ScatterTemplate : ScatterTemplates)
+	{
+		float SpawnChance = ScatterTemplate.GetDefaultObject()->SpawnChance;
+		FColor DebugColor = ScatterTemplate.GetDefaultObject()->DebugColor;
+		TSubclassOf<AActor> ActorToSpawn = ScatterTemplate.GetDefaultObject()->ActorToSpawn;
+		
+		// 20% change to spawn a scatter object
+		if (FMath::RandRange(0, 100) > SpawnChance) return;
+		// Get corners of Chunk
+		FVector ChunkCorner1 = Chunk - FVector(ChunkSize / 2);
+		FVector ChunkCorner2 = Chunk + FVector(ChunkSize / 2);
+		ChunkCorner1.Z = GetActorLocation().Z;
+		ChunkCorner2.Z = GetActorLocation().Z;
+		// Get a random point inbetween corner 1 & 2
+
+		FVector RandomPoint = FMath::RandPointInBox(FBox(ChunkCorner1, ChunkCorner2));
+
+		// From random point raycast down to get the ground position
+		FHitResult HitResult;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(this);
+		GetWorld()->LineTraceSingleByChannel(HitResult, RandomPoint, RandomPoint - FVector(0, 0, 10000), ECC_Visibility,
+		                                     CollisionParams);
+		DrawDebugPoint(GetWorld(), HitResult.Location, 10, DebugColor, true, 2, 0);
+
+		// Spawn ActorToSpawn at HitResult.Location
+		GetWorld()->SpawnActor<AActor>(ActorToSpawn, HitResult.Location, FRotator::ZeroRotator);
 	}
 }
 

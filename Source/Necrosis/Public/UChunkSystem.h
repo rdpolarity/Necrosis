@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Chunk.h"
+#include "ScatterTemplate.h"
 #include "GameFramework/Actor.h"
 #include "UChunkSystem.generated.h"
 
@@ -18,13 +19,13 @@ public:
 	AUChunkSystem();
 
 	UPROPERTY(EditAnywhere)
-	float ChunkSize = 1000;
+	float ChunkSize = 10000;
 
 	UPROPERTY(EditAnywhere)
-	float ChunkSpawnRadius = 5;
+	float ChunkSpawnRadius = 10;
 
 	UPROPERTY(EditAnywhere)
-	float ChunkDespawnRadius = 6;
+	float ChunkDespawnRadius = 20;
 
 	UPROPERTY(EditAnywhere)
 	bool bDebugRenderChunks = false;
@@ -37,6 +38,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TMap<FVector, UChunk*> SpawnedChunks;
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UScatterTemplate>> ScatterTemplates;
 	
 	UFUNCTION(CallInEditor)
 	FVector RoundVector(FVector VectorToRound) const;
@@ -50,6 +54,9 @@ public:
 	UFUNCTION()
 	void DespawnChunksAround(FVector Point);
 
+	UFUNCTION()
+	void GenerateScatterObjectsAround(FVector Chunk);
+	
 	UFUNCTION()
 	void DebugRenderChunks();
 
