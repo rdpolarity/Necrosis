@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Chunk.h"
 #include "GameFramework/Actor.h"
 #include "UChunkSystem.generated.h"
+
 
 UCLASS()
 class NECROSIS_API AUChunkSystem : public AActor
@@ -16,26 +18,40 @@ public:
 	AUChunkSystem();
 
 	UPROPERTY(EditAnywhere)
-	int32 ChunkSize = 1000;
+	float ChunkSize = 1000;
 
 	UPROPERTY(EditAnywhere)
-	int32 ChunkSpawnRadius = 3;
+	float ChunkSpawnRadius = 5;
 
-	// vector position
 	UPROPERTY(EditAnywhere)
-	FVector PlayerPosition = {0, 0, 0};
+	float ChunkDespawnRadius = 6;
+
+	UPROPERTY(EditAnywhere)
+	bool bDebugRenderChunks = false;
+
+	UPROPERTY(EditAnywhere)
+	FVector PlayerChunkPosition = {0, 0, 0};
 
 	UPROPERTY(EditAnywhere)
 	FVector PlayerLastEnteredChunkPosition = {0, 0, 0};
 
+	UPROPERTY(EditAnywhere)
+	TMap<FVector, UChunk*> SpawnedChunks;
+	
 	UFUNCTION(CallInEditor)
-	void CheckIfPlayerHasChangedChunk();
-
-	UFUNCTION(CallInEditor)
-	void RoundVector(FVector& VectorToRound);
+	FVector RoundVector(FVector VectorToRound) const;
 
 	UFUNCTION()
-	void OnChangeChunk();
+	void OnChangeChunk(FVector NewChunkPosition);
+
+	UFUNCTION()
+	void SpawnChunksAround(FVector Point);
+
+	UFUNCTION()
+	void DespawnChunksAround(FVector Point);
+
+	UFUNCTION()
+	void DebugRenderChunks();
 
 protected:
 	// Called when the game starts or when spawned
