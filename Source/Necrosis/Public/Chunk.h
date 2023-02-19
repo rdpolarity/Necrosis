@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ChunkActor.h"
+#include "ScatterTemplate.h"
 #include "UObject/NoExportTypes.h"
 #include "Chunk.generated.h"
 
@@ -21,4 +23,25 @@ class NECROSIS_API UChunk : public UObject
 public:
 	UPROPERTY(EditAnywhere)
 	EChunkState ChunkState = EChunkState::SPAWNED;
+
+	UPROPERTY(EditAnywhere)
+	FVector ChunkPosition;
+
+	UPROPERTY(EditAnywhere)
+	class AUChunkSystem* ChunkSystem;
+	
+	UPROPERTY(EditAnywhere)
+	TArray<AChunkActor*> SpawnedActors;
+
+	UFUNCTION(BlueprintCallable)
+	void ScatterObjects();
+
+	UFUNCTION(BlueprintCallable)
+	void Spawn();
+
+	UFUNCTION(BlueprintCallable)
+	void DeSpawn();
+
+	UFUNCTION(BlueprintCallable)
+	void ReSpawn();
 };

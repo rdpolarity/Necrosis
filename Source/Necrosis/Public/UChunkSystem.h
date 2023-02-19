@@ -53,9 +53,6 @@ public:
 
 	UFUNCTION()
 	void DespawnChunksAround(FVector Point);
-
-	UFUNCTION()
-	void GenerateScatterObjectsAround(FVector Chunk);
 	
 	UFUNCTION()
 	void DebugRenderChunks();

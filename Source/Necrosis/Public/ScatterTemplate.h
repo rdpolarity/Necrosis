@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ChunkActor.h"
 #include "UObject/NoExportTypes.h"
 #include "ScatterTemplate.generated.h"
 
@@ -16,5 +17,5 @@ public:
 	UPROPERTY(EditAnywhere)
 	FColor DebugColor = FColor::Blue;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AActor> ActorToSpawn;
+	TSubclassOf<AChunkActor> ActorToSpawn;
 };
