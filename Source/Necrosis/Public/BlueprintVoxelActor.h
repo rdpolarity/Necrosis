@@ -19,4 +19,7 @@ public:
 
 private:
 	GENERATED_BODY()
+
+	UFUNCTION(CallInEditor, Category = "Voxel")
+	void TriggerSomething();
 };

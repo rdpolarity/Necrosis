@@ -18,3 +18,9 @@ void ABlueprintVoxelActor::Tick(float DeltaTime)
 	
 	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("pos: %s"), *pos.ToString()));
 }
+
+void ABlueprintVoxelActor::TriggerSomething()
+{
+	// Print a debug message to the screen
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("TriggerSomething"));
+}
