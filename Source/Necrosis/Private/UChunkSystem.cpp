@@ -3,6 +3,9 @@
 
 #include "UChunkSystem.h"
 
+#include "VoxelTask.h"
+#include "VoxelTask.h"
+
 // Sets default values
 AUChunkSystem::AUChunkSystem()
 {

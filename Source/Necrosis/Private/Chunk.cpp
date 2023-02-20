@@ -42,10 +42,12 @@ void UChunk::ScatterObjects()
 			UE_LOG(LogTemp, Warning, TEXT("Found ground position"));
 		}
 		
-		// DrawDebugPoint(ChunkSystem->GetWorld(), HitResult.Location, 10, DebugColor, true, 2, 0);
+		DrawDebugPoint(ChunkSystem->GetWorld(), HitResult.Location, 10, DebugColor, true, 2, 0);
 
-		AChunkActor* SpawnedActor = GetWorld()->SpawnActor<AChunkActor>(ActorToSpawn, HitResult.Location,
-		                                                                FRotator::ZeroRotator);
+
+		
+		// AChunkActor* SpawnedActor = GetWorld()->SpawnActor<AChunkActor>(ActorToSpawn, HitResult.Location,
+		                                                                // FRotator::ZeroRotator);
 		// SpawnedActor->Spawn();
 	}
 }

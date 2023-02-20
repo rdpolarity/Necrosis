@@ -10,7 +10,7 @@ public class Necrosis : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] {"AITestSuite"});
+		PrivateDependencyModuleNames.AddRange(new string[] {"AITestSuite", "VoxelMetaGraph", "VoxelRuntime", "VoxelCore"});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

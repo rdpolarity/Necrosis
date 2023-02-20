@@ -17,5 +17,5 @@ public:
 	UPROPERTY(EditAnywhere)
 	FColor DebugColor = FColor::Blue;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AChunkActor> ActorToSpawn;
+	TSubclassOf<AActor> ActorToSpawn;
 };
