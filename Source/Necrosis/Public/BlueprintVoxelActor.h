@@ -11,14 +11,14 @@
 #include "Nodes/VoxelFoliageNodes.h"
 #include "BlueprintVoxelActor.generated.h"
 
-typedef UObject BlueprintType;
+typedef UBlueprint UBlueprintPinType;
 
 USTRUCT(DisplayName= "Blueprint Class")
-struct NECROSIS_API FVoxelBlueprintClassData 
+struct NECROSIS_API FVoxelBlueprintClassData
 {
 	GENERATED_BODY()
 
-	TSharedPtr<BlueprintType> BlueprintClassData;
+	TWeakObjectPtr<UBlueprint> BlueprintClassData;
 };
 
 USTRUCT()
@@ -26,10 +26,11 @@ struct NECROSIS_API FVoxelBlueprintClassDataPinType : public FVoxelExposedPinTyp
 {
 	GENERATED_BODY()
 
-	DEFINE_VOXEL_EXPOSED_PIN_TYPE(FVoxelBlueprintClassData, TSoftObjectPtr<BlueprintType>)
+	DEFINE_VOXEL_EXPOSED_PIN_TYPE(FVoxelBlueprintClassData, TSoftObjectPtr<UBlueprint>)
 	{
-		const auto SharedActor = MakeShared<FVoxelBlueprintClassData>();
-		return SharedActor;
+		TSharedRef<FVoxelBlueprintClassData> SharedBlueprint = MakeShared<FVoxelBlueprintClassData>();
+		SharedBlueprint->BlueprintClassData = Value.LoadSynchronous();
+		return SharedBlueprint;
 	}
 };
 
@@ -42,8 +43,21 @@ struct NECROSIS_API FVoxelChunkExecNode_CreateBlueprintSpawnerComponent : public
 	VOXEL_INPUT_PIN(FVoxelFoliageChunkData, ChunkData, nullptr);
 	VOXEL_INPUT_PIN(FColor, DebugColour, FColor::White);
 	VOXEL_INPUT_PIN(FVoxelBlueprintClassData, ActorClass, nullptr);
-	
+
 	virtual TValue<FVoxelChunkExecObject> Execute(const FVoxelQuery& Query) const override;
+};
+
+USTRUCT()
+struct NECROSIS_API FBlueprintSpawnData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FVector SpawnPosition;
+	UPROPERTY()
+	FRotator SpawnRotation;
+	UPROPERTY()
+	UBlueprint* ActorClass = nullptr;
 };
 
 USTRUCT()
@@ -56,10 +70,9 @@ protected:
 public:
 	GENERATED_BODY()
 	GENERATED_VIRTUAL_STRUCT_BODY()
-	TArray<FVector> SpawnPositions = TArray<FVector>();
-	// std::optional<UBlueprint> ActorClass;
+	TArray<FBlueprintSpawnData> SpawnData = TArray<FBlueprintSpawnData>();
 };
-	
+
 UCLASS()
 class NECROSIS_API ABlueprintVoxelActor : public AVoxelActor
 {
@@ -74,4 +87,7 @@ private:
 
 	UFUNCTION(CallInEditor, Category = "Voxel")
 	void TriggerSomething();
+
+public:
+	virtual TSharedRef<IVoxelMetaGraphRuntime> MakeMetaGraphRuntime(FVoxelRuntime& Runtime) const override;
 };

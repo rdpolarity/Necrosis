@@ -48,6 +48,11 @@
 			"Name": "GraphFormatter",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/297159d6d3f4425b9c095b18a811a401"
+		},
+		{
+			"Name": "WorldDirectorPRO",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/3397cca8927244ac9efabc2a8a7e639a"
 		}
 	]
 }

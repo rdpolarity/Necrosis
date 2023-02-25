@@ -17,14 +17,10 @@ TVoxelFutureValue<FVoxelChunkExecObject> FVoxelChunkExecNode_CreateBlueprintSpaw
 	const auto ActorClass = GetNodeRuntime().Get(ActorClassPin, Query);
 	const auto DebugColour = GetNodeRuntime().Get(DebugColourPin, Query);
 
-	// FindVoxelQueryData(FVoxelBoundsQueryData, BoundsQueryData);
-
-	return VOXEL_ON_COMPLETE(AsyncThread, ChunkData, ActorClass)
+	return VOXEL_ON_COMPLETE(GameThread, ChunkData, ActorClass)
 	{
 		const TSharedRef<FVoxelChunkExecObject_CreateBlueprintSpawnerComponent> ChunkExecObject =
 			MakeShared<FVoxelChunkExecObject_CreateBlueprintSpawnerComponent>();
-	
-		TArray<FVector> SpawnPositions = TArray<FVector>();
 
 		// Do nothing if there's no data
 		if (ChunkData->Data.Num() == 0 ||
@@ -40,15 +36,21 @@ TVoxelFutureValue<FVoxelChunkExecObject> FVoxelChunkExecNode_CreateBlueprintSpaw
 			const TSharedPtr<FVoxelFoliageChunkMeshData>& MeshData = ChunkData->Data[MeshIndex];
 			for (int32 MeshInstanceIndex = 0; MeshInstanceIndex < MeshData->Transforms->Num(); MeshInstanceIndex++)
 			{
-				const FVector3f& InstancePosition = (*MeshData->Transforms)[MeshInstanceIndex].GetLocation() +
+				const auto InstancePosition = (*MeshData->Transforms)[MeshInstanceIndex].GetLocation() +
 					FVector3f(ChunkData->ChunkPosition);
-				SpawnPositions.Add(FVector(InstancePosition.X, InstancePosition.Y, InstancePosition.Z));
+				const auto InstanceRotation = (*MeshData->Transforms)[MeshInstanceIndex].GetRotation().Rotator();
+				const auto InstanceClass = ActorClass.BlueprintClassData.Get();
+
+				// Convert to unreal values
+				const FVector InstanceVectorPosition = FVector(InstancePosition.X, InstancePosition.Y,
+				                                               InstancePosition.Z);
+				const FRotator InstanceRotator = {InstanceRotation.Pitch, InstanceRotation.Yaw, InstanceRotation.Roll};
+				const FBlueprintSpawnData SpawnData = {InstanceVectorPosition, InstanceRotator, InstanceClass};
+				ChunkExecObject->SpawnData.Add(SpawnData);
+
 				InstanceIndex++;
 			}
 		}
-
-		ChunkExecObject->SpawnPositions = SpawnPositions;
-		// ChunkExecObject->ActorClass = ActorClass;
 
 		return ChunkExecObject;
 	};
@@ -59,14 +61,23 @@ void FVoxelChunkExecObject_CreateBlueprintSpawnerComponent::Create(FVoxelRuntime
 	FVoxelChunkExecObject::Create(Runtime);
 	// draw debug point
 	// For each SpawnPosition draw debug point
-	for (auto& SpawnPosition : SpawnPositions)
+	for (FBlueprintSpawnData Data : SpawnData)
 	{
 		if (GEngine->IsEditor() && !Runtime.GetWorld()->IsPlayInEditor())
 		{
-			DrawDebugPoint(Runtime.GetWorld(), SpawnPosition, 10.f, FColor::Red, true, 0.1f);
-		} else
+			// DrawDebugPoint(Runtime.GetWorld(), SpawnPosition, 10.f, FColor::Red, true, 0.1f);
+		}
+		else
 		{
-			
+			if (Data.ActorClass == nullptr) return;
+			auto GeneratedClass = Data.ActorClass->GeneratedClass;
+
+			if (GeneratedClass->IsChildOf(AActor::StaticClass()))
+			{
+				TSubclassOf<AActor> ActorStaticClass = TSubclassOf<AActor>(GeneratedClass);
+				AActor* Actor = Runtime.GetWorld()->SpawnActor<AActor>(ActorStaticClass, Data.SpawnPosition,
+				                                                       Data.SpawnRotation);
+			}
 		}
 	}
 }
@@ -102,4 +113,10 @@ void ABlueprintVoxelActor::TriggerSomething()
 {
 	// Use CoreDelegates to run an event when a task is finished
 	// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("taskNumber: %d"), taskNumber));
+}
+
+TSharedRef<IVoxelMetaGraphRuntime> ABlueprintVoxelActor::MakeMetaGraphRuntime(FVoxelRuntime& Runtime) const
+{
+	return Super::MakeMetaGraphRuntime(Runtime);
+	FlushPersistentDebugLines(Runtime.GetWorld());
 }
